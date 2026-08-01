@@ -1,0 +1,4 @@
+git clone https://github.com/yashshingavi2006-lab/I2I-portal.git
+cd I2I-portal
+npm install
+npm run dev
