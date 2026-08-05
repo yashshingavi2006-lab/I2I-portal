@@ -63,6 +63,7 @@ export function PortfolioWorkspace({
   const [loading, setLoading] = useState(false);
   const [gradingMeeting, setGradingMeeting] = useState<Meeting | null>(null);
   const [showRaiseForm, setShowRaiseForm] = useState(false);
+  const [newMilestone, setNewMilestone] = useState("");
 
   const selected = teams.find((t) => t.id === selectedId) ?? null;
 
@@ -114,6 +115,27 @@ export function PortfolioWorkspace({
   }
 
   const awaitingGrading = meetings.filter((m) => m.status === "awaiting_grading");
+
+  async function addMilestone() {
+    if (!newMilestone.trim() || !selectedId) return;
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("milestones")
+      .insert({ team_id: selectedId, title: newMilestone.trim(), created_by: currentUserId })
+      .select("id,title,description,is_done")
+      .single();
+    if (data) setMilestones((prev) => [...prev, data]);
+    setNewMilestone("");
+  }
+
+  async function toggleMilestone(id: string, done: boolean) {
+    const supabase = createClient();
+    setMilestones((prev) => prev.map((m) => (m.id === id ? { ...m, is_done: done } : m)));
+    await supabase
+      .from("milestones")
+      .update({ is_done: done, completed_at: done ? new Date().toISOString() : null })
+      .eq("id", id);
+  }
 
   if (teams.length === 0) {
     return (
@@ -203,9 +225,10 @@ export function PortfolioWorkspace({
               <ul className="mt-3 space-y-2">
                 {milestones.map((m) => (
                   <li key={m.id} className="flex items-center gap-2 text-sm">
-                    <span
-                      className={`h-4 w-4 rounded border ${
-                        m.is_done ? "border-marigold bg-marigold" : "border-line"
+                    <button
+                      onClick={() => toggleMilestone(m.id, !m.is_done)}
+                      className={`h-4 w-4 shrink-0 rounded border transition ${
+                        m.is_done ? "border-marigold bg-marigold" : "border-line hover:border-marigold/50"
                       }`}
                     />
                     <span className={m.is_done ? "text-muted line-through" : "text-ink"}>
@@ -215,6 +238,21 @@ export function PortfolioWorkspace({
                 ))}
               </ul>
             )}
+            <div className="mt-3 flex gap-2">
+              <input
+                value={newMilestone}
+                onChange={(e) => setNewMilestone(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && addMilestone()}
+                placeholder="Add a milestone..."
+                className="flex-1 rounded-lg border border-line bg-paper px-3 py-1.5 text-xs text-ink outline-none focus:border-marigold"
+              />
+              <button
+                onClick={addMilestone}
+                className="rounded-lg bg-marigold px-3 py-1.5 text-xs font-semibold text-ink"
+              >
+                Add
+              </button>
+            </div>
           </div>
 
           {/* Ambassador: raise evaluation form */}

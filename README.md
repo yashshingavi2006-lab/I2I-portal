@@ -361,3 +361,231 @@ make sure those are run.
 **Not built yet in this pass:** the milestone *creation* UI (currently
 read-only display), and marking milestones as done. Small addition whenever
 you want it — say so and I'll wire it in.
+
+## Secretary portal — now fully built (all 4 phases + management)
+
+Restructured into real sub-routes under `/portal/secretary/`, each with real
+data and real actions:
+
+- **Overview** (`/portal/secretary`) — live stats (total/pending/eligible,
+  selection rate), sector breakdown bar chart, competition-gate distribution,
+  recent audit activity
+- **Phase 1** (`/phase-1`) — registration queue, tabs, search, and the
+  **"Make All Phase 1 Eligible" bulk action** wired to the
+  `make_all_phase1_eligible()` SQL function
+- **Phase 2** (`/phase-2`) — proposal queue with **Pass/Reject fast
+  screening** buttons (writes to `phase2_applications.screening_status`)
+- **Phase 3** (`/phase-3`) — all joint meeting evaluations across every team,
+  ambassador vs mentor scores, status
+- **Phase 4** (`/phase-4`) — jury score entry + result award assignment
+  (Not Scored / Under Evaluation / Completed / Winner), upserts to
+  `phase4_submissions`
+- **Edit Requests** (`/edit-requests`) — approve/reject participant requests
+
+All secretary actions talk to Supabase directly from the browser (RLS
+enforces access, same pattern as Mentor/Ambassador).
+
+## Participant portal — Phase 2 submission + Phase 3 timeline now real
+
+`components/participant/workspace-tab.tsx` rebuilt:
+- **Phase 2 view** (shown once shortlisted): 4-gate live tracker (PPT
+  Screening / Bank Verification / Funding Allotment / Jury & Mentors,
+  computed from real data), plus 3 sub-tabs — pitch deck **link** submission
+  (not file upload, per the reference), itemized budget/bills, bank details
+- **Phase 3 view** (shown once past Phase 2): approved funding, assigned
+  mentor/ambassador names, and a daily timeline log participants can add to
+  and edit (locks when `teams.timeline_locked` is true)
+
+## Not yet built
+- Phase 4 participant-facing submission (report/PPT/video links) — the
+  Secretary side can already receive and score these, participant upload UI
+  still needed
+- Milestone *creation* (still read-only display everywhere)
+- Users & Access management screen (Secretary assigning roles/permissions) —
+  currently has to be done via direct SQL per the setup steps earlier in
+  this README
+
+## Secretary portal — the remaining big gaps, now closed
+
+- **Phase 2 → Review modal**: click "🎓 Review" on any proposal to see its
+  full bill breakdown, bank details, and set a real funding decision
+  (Under Review / Approved / Partial / Rejected + approved amount) —
+  previously only the fast-screening Pass/Reject existed
+- **Phase 3 → Assign Mentor & Ambassador**: the actual admin UI for the
+  assignment system that was backend-only until now. Pick a team, pick a
+  mentor, pick an ambassador, click Assign — the database trigger enforces
+  the 1-3 project cap and rejects (with a visible error) if you try to
+  over-assign someone. Only shows teams whose funding is approved/partial
+  and don't yet have both roles filled.
+- **Users & Access** (`/portal/secretary/users`) — the Secretary can now
+  invite Chief Ambassadors, Ambassadors, Mentors, and Heads directly from
+  the UI instead of doing it via raw SQL. New API route
+  `app/api/staff/invite/route.ts` uses the same invite-by-email pattern as
+  participant registration — the invited person gets an email to set their
+  password, and a `staff_profiles` row is created automatically with the
+  right role.
+- **Audit logging** now actually fires on real actions (screening
+  decisions, funding decisions, assignments, staff invites) — the Overview
+  dashboard's "Recent Audit Activity" feed will show real activity instead
+  of staying empty.
+
+Still not built: Phase Engine (phase open/close scheduling — table exists,
+no UI), Email Templates admin editor (table exists, no UI), participant
+Phase 4 submission UI. All lower priority than what's now working.
+
+## Participant portal — Phase 4 submission now built
+
+Once a team reaches `funded` or `completed` status, a new panel appears
+below the Phase 3 timeline: submit final report / presentation / demo video
+as links, then see the jury's result (Not Scored / Under Evaluation /
+Completed / 🏆 Winner) and score once the Secretary grades it from their
+Phase 4 screen.
+
+## Mentor + Ambassador portal — milestones now interactive
+
+The Structured Milestone Checklist was read-only until now. Both roles can:
+- **Add a milestone** — types a title, hits Enter or clicks Add
+- **Toggle it done** — click the checkbox, updates immediately and syncs to
+  the database (`is_done` + `completed_at`)
+
+Both Mentor and Ambassador share management rights on a team's milestones
+(either can add/check them off) since they're expected to collaborate.
+
+## Phase 2 — real file uploads, congratulations screen, secretary export
+
+**New setup step:** run `database/13_phase2_uploads.sql` (after `12_...sql`),
+then `npm install` (adds `exceljs` for the spreadsheet export). This
+migration adds 3 columns to `phase2_applications` and creates a **private**
+Supabase Storage bucket, `phase2-uploads`, with RLS scoped by team.
+
+**Participant side** (`components/participant/workspace-tab.tsx` →
+`Phase2Panel`):
+- A congratulations banner appears the moment a team is shortlisted into
+  Phase 2, with a **"Download Phase 2 Proposal Format"** button —
+  `public/templates/I2I-Phase2-Pitch-Format.docx`, a branded fill-in
+  template (problem statement, solution, impact, milestone plan, itemized
+  budget table, sustainability plan, team details, declaration).
+- The "Pitch & Documents" tab now has a real **file upload** for the pitch
+  deck (`.pdf`/`.pptx`, 25MB) instead of a pasted link, plus optional
+  uploads for a pitch/prototype video (`.mp4`, 100MB), a research paper
+  (`.pdf`, 20MB), and up to 6 free-form "other documents"
+  (`.pdf/.doc/.docx/.jpg/.png`, 20MB each) — plus a brief written summary
+  and the total amount requested.
+- The Bank Details tab now also collects a **passbook photo** (required)
+  and **PAN photo** (optional) upload, alongside the existing account
+  fields — used only for fund disbursal, never for any transaction.
+- Every upload goes through `components/participant/file-upload-field.tsx`
+  (single file) or `other-documents-field.tsx` (multiple): extension +
+  size are validated client-side *before* the request is sent, every
+  Storage call is wrapped in try/catch with a plain-language error message,
+  and a failed upload never breaks the rest of the form — this matters at
+  the scale of hundreds of concurrent participants, where letting one bad
+  upload cascade into a broken page isn't an option.
+
+**Secretary side** (`components/secretary/phase2-queue.tsx`): a
+**"⬇ Download Spreadsheet"** button calls the new
+`app/api/secretary/phase2-export/route.ts` (Secretary-only, checked
+server-side) which builds a multi-sheet `.xlsx` with `exceljs` — a
+**Summary** sheet with per-sector counts, then **one sheet per sector**
+with every application's details, funding numbers, and a signed link
+(14-day expiry) to every uploaded file. File links are batch-signed in a
+single Storage call per export rather than one call per file, and a
+signing hiccup degrades to "Link unavailable" for that file instead of
+failing the whole export.
+
+**On the 1000-participant capacity question:** project codes already use
+3-digit padding per sector per year (`database/10_scale_fixes.sql`), so
+each of the 6 sectors supports up to 999 registrations/year — comfortably
+past 1000 total. The other real bottleneck at that scale is Supabase's
+free tier: 1GB Storage and 500MB DB are easy to exceed once participants
+start uploading pitch decks/videos, and its default auth email sending is
+rate-limited (the custom-SMTP setup in the Notifications section above
+already addresses that half). Worth moving to a paid Supabase plan before
+Phase 2 uploads open if you haven't already.
+
+## Phase 2 form — simplified to 4 sections (video removed)
+
+The participant's Phase 2 submission is now exactly 4 sections instead of the
+earlier 3-tab/6-upload version:
+
+1. **Pitch Deck** — one required upload (PDF/PPTX) + one optional
+   "other supporting document" (down from up to 6).
+2. **Bills** — a single required upload (PDF/DOC/DOCX/JPG/PNG) with all
+   itemized costs, replacing the old typed line-item bill table.
+3. **Passbook & PAN** — passbook page 1 photo (required) + PAN photo, one
+   side (optional) — no more manually-typed bank account holder/number/
+   IFSC/bank name fields.
+4. **Mentor Request** — new Yes/No dropdown: does the team want a mentor
+   assigned to this project.
+
+**Pitch/prototype video upload has been removed entirely** — the largest
+per-team Storage cost, and the free-tier bottleneck flagged earlier in this
+README. (Still to do: swap Phase 4's video field, and re-add Phase 2 video
+as a YouTube/Drive link, per the plan discussed but not yet built.)
+
+Run `database/14_phase2_form_v2.sql` after `13_phase2_uploads.sql`. It only
+*adds* `bills_doc_url` and `mentor_requested` — the old now-unused columns
+(`pitch_summary`, `amount_requested`, `pitch_video_url`,
+`research_paper_url`, the four `bank_*` columns) and the old
+`phase2_bill_items` table are left in place rather than dropped, in case
+any real submissions already used them.
+
+Secretary side updated to match: the Phase 2 queue and review modal now
+show a Bills document link, Passbook/PAN links, and the Mentor Requested
+answer instead of typed bank details and the bill-items table. The
+spreadsheet export's columns were updated the same way.
+
+## Phase 2 — Review & Submit, and spreadsheet-driven Phase 3 shortlisting
+
+**New setup step:** run `database/16_phase3_review_and_notify.sql` after
+`15_bank_pan_manual_fields.sql`. No new npm packages this time.
+
+- **Participant side:** a 5th "Review & Submit" tab on the Phase 2 form —
+  a checklist of all 4 sections (click any row to jump straight to it),
+  disabled until pitch deck + bills + bank/PAN are complete, and a Submit
+  button that stamps `phase2_applications.submitted_at`. This is a soft
+  lock, not a hard one — participants can still edit afterward, and
+  re-submitting just updates the timestamp. The Secretary's export uses
+  this to show who's actually finished vs. still mid-form.
+
+- **Secretary side, bulk accept/reject via spreadsheet:** the exported
+  `.xlsx` now has a **"Phase 3 Decision"** column right after Project Code,
+  with a real Excel dropdown (Accept/Reject — pre-filled from any existing
+  decision, color-coded green/red) and a **"Submitted"** Yes/No column.
+  Workflow: download → open in Excel → for each project, click the
+  document links to review, pick Accept/Reject from the dropdown → save →
+  upload the same file back via the new **"⬆ Upload Reviewed Spreadsheet"**
+  button next to the download button.
+
+  `app/api/secretary/phase2-import/route.ts` parses every sector sheet
+  (skips "Summary" automatically, and skips any sheet that isn't shaped
+  like our export rather than erroring the whole import), matches rows by
+  Project Code, and bulk-updates `teams.status` /
+  `phase2_applications.funding_status`. It reports back exactly what
+  happened — accepted count, rejected count, project codes it couldn't
+  find, and any decision cell it couldn't parse — rather than failing
+  silently or all-or-nothing.
+
+  **Safety guard:** only teams still at `shortlisted_phase2` are touched.
+  If you re-upload an old copy of the spreadsheet after a team has already
+  progressed (e.g. to `funded`), that row is silently skipped instead of
+  reverting real progress — the response's `alreadyDecided` count tells you
+  how many rows this happened to.
+
+- **Notifications:** a new DB trigger (`trg_notify_phase3_shortlist`,
+  mirrors the existing Phase 2 one) auto-queues a `phase3_shortlisted`
+  email + WhatsApp notification the moment `teams.status` becomes
+  `shortlisted_phase3` — whether that happens via the spreadsheet import
+  above, or the existing single-project modal (which, until this change,
+  didn't notify participants of Phase 3 selection at all).
+
+## Status: all 4 portals now have complete, real backend functionality
+
+Every major screen from the reference portal screenshots is now wired to
+real data with real actions — registration, funding decisions, mentor/
+ambassador assignment, joint evaluations, milestones, daily timeline,
+discussion board, Phase 4 submissions, staff invites, and edit requests.
+
+Remaining lower-priority items: Phase Engine (open/close scheduling UI),
+Email Templates admin editor — both have their database tables ready, just
+no UI yet.

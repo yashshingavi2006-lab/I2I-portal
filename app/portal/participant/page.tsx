@@ -33,7 +33,7 @@ export default async function ParticipantPortal() {
     (team.sectors as unknown as { display_name: string } | null)?.display_name ?? "—";
 
   return (
-    <PageShell particles={false} className="flex min-h-screen flex-col">
+    <PageShell particles={false} theme="v0" className="flex min-h-screen flex-col">
       <PortalHeader
         portalLabel="Participant"
         name={team.leader_name}
