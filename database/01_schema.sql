@@ -160,6 +160,7 @@ create table phase2_applications (
   bank_branch text,
   passbook_doc_url text,
   pan_doc_url text,
+  pan_number text,
 
   funding_requested boolean not null default false,
   amount_requested numeric(10,2),

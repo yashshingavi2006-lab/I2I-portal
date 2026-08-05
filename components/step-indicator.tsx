@@ -5,6 +5,8 @@ const STEPS = [
   { n: 2, label: "Location" },
   { n: 3, label: "Sector" },
   { n: 4, label: "Project" },
+  { n: 5, label: "Review" },
+  { n: 6, label: "Password" },
 ];
 
 export function StepIndicator({ current }: { current: number }) {

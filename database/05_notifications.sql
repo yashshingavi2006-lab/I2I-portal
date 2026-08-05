@@ -10,7 +10,8 @@
 create type notification_channel as enum ('email', 'whatsapp');
 
 create type notification_type as enum (
-  'leader_invite',           -- Phase 1: set-password invite
+  'leader_invite',           -- legacy: old email-link invite flow (kept for compatibility)
+  'registration_confirmed',  -- Phase 1: confirms registration + login email (password set in-app now)
   'phase2_shortlisted',      -- team moved to Phase 2
   'mentor_assigned',         -- Phase 3: notify the mentor
   'ambassador_assigned',     -- Phase 3: notify the ambassador

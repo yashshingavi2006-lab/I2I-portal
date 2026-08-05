@@ -50,7 +50,7 @@ export function ParticipantTabs({ team }: { team: TeamData }) {
       </div>
 
       {tab === "workspace" ? (
-        <WorkspaceTab status={team.status} />
+        <WorkspaceTab teamId={team.id} status={team.status} />
       ) : (
         <TeamInfoTab team={team} />
       )}

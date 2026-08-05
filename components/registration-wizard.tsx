@@ -15,6 +15,15 @@ import {
 
 type Member = { full_name: string; email: string; phone: string; year_of_study: string };
 
+function PreviewRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="grid gap-1 border-b border-line pb-3 last:border-0 last:pb-0 sm:grid-cols-[160px_1fr] sm:gap-3">
+      <span className="text-xs font-medium uppercase tracking-wide text-muted">{label}</span>
+      <span className="text-ink">{value || "—"}</span>
+    </div>
+  );
+}
+
 type FormData = {
   // Page 1
   team_name: string;
@@ -22,6 +31,8 @@ type FormData = {
   leader_name: string;
   leader_email: string;
   leader_phone: string;
+  leader_password: string;
+  leader_password_confirm: string;
   leader_whatsapp_optin: boolean;
   leader_gender: string;
   leader_dob: string;
@@ -55,6 +66,8 @@ const initialData: FormData = {
   leader_name: "",
   leader_email: "",
   leader_phone: "",
+  leader_password: "",
+  leader_password_confirm: "",
   leader_whatsapp_optin: true,
   leader_gender: "",
   leader_dob: "",
@@ -84,7 +97,7 @@ export function RegistrationWizard() {
   const [data, setData] = useState<FormData>(initialData);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<{ project_code: string } | null>(null);
+  const [result, setResult] = useState<{ project_code: string; email_sent: boolean } | null>(null);
 
   function update<K extends keyof FormData>(key: K, value: FormData[K]) {
     setData((d) => ({ ...d, [key]: value }));
@@ -101,9 +114,56 @@ export function RegistrationWizard() {
     });
   }
 
+  function stepError(s: number): string | null {
+    if (s === 1) {
+      if (!data.team_name.trim()) return "Team name is required.";
+      if (!data.leader_name.trim()) return "Team leader's name is required.";
+      if (!data.leader_email.trim() || !/^\S+@\S+\.\S+$/.test(data.leader_email))
+        return "A valid leader email is required.";
+      if (!data.leader_phone.trim() || data.leader_phone.replace(/\D/g, "").length < 10)
+        return "A valid 10-digit leader phone number is required.";
+      for (let i = 0; i < data.members.length; i++) {
+        const m = data.members[i];
+        if (!m.full_name.trim()) return `Member ${i + 2}'s name is required.`;
+        if (!m.email.trim() || !/^\S+@\S+\.\S+$/.test(m.email))
+          return `Member ${i + 2}'s email is required.`;
+      }
+    }
+    if (s === 2) {
+      if (!data.state.trim()) return "State is required.";
+      if (!data.city.trim()) return "City is required.";
+      if (!data.college_name.trim()) return "College name is required.";
+    }
+    if (s === 3) {
+      if (!data.sector_prefix) return "Please select a sector before continuing.";
+    }
+    if (s === 4) {
+      if (!data.project_name.trim()) return "Project name is required.";
+      if (!data.problem_statement.trim()) return "Problem statement is required.";
+      if (!data.proposed_solution.trim()) return "Proposed solution is required.";
+      if (!data.target_beneficiaries.trim()) return "Target beneficiaries is required.";
+    }
+    if (s === 5) {
+      if (!data.consent_given)
+        return "Please accept the declaration to continue.";
+    }
+    if (s === 6) {
+      if (!data.leader_password || data.leader_password.length < 8)
+        return "Password must be at least 8 characters.";
+      if (data.leader_password !== data.leader_password_confirm)
+        return "Passwords don't match.";
+    }
+    return null;
+  }
+
   function next() {
+    const err = stepError(step);
+    if (err) {
+      setError(err);
+      return;
+    }
     setError(null);
-    setStep((s) => Math.min(4, s + 1));
+    setStep((s) => Math.min(6, s + 1));
   }
   function back() {
     setError(null);
@@ -111,9 +171,16 @@ export function RegistrationWizard() {
   }
 
   async function submit() {
-    if (!data.consent_given) {
-      setError("Please accept the declaration to submit your registration.");
-      return;
+    // Defensive: re-check every step even though the wizard shouldn't allow
+    // getting here with something missing — catches any edge case where
+    // state was set some other way (e.g. browser back/forward cache).
+    for (const s of [1, 2, 3, 4, 5, 6]) {
+      const err = stepError(s);
+      if (err) {
+        setStep(s);
+        setError(err);
+        return;
+      }
     }
     setSubmitting(true);
     setError(null);
@@ -124,7 +191,7 @@ export function RegistrationWizard() {
         body: JSON.stringify(data),
       });
 
-      let json: { project_code?: string; error?: string } = {};
+      let json: { project_code?: string; error?: string; email_sent?: boolean } = {};
       try {
         json = await res.json();
       } catch {
@@ -136,7 +203,7 @@ export function RegistrationWizard() {
       }
 
       if (!res.ok) throw new Error(json.error || "Registration failed");
-      setResult({ project_code: json.project_code! });
+      setResult({ project_code: json.project_code!, email_sent: json.email_sent ?? false });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong");
     } finally {
@@ -149,51 +216,54 @@ export function RegistrationWizard() {
       <motion.div
         initial={{ opacity: 0, y: 20, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
         className="mx-auto max-w-lg rounded-2xl border border-line bg-surface p-8 text-center shadow-sm"
       >
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ delay: 0.2, type: "spring", stiffness: 300, damping: 15 }}
+          transition={{ delay: 0.15, type: "spring", stiffness: 300, damping: 15 }}
           className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-marigold-light"
         >
           <span className="text-2xl">✓</span>
         </motion.div>
-        <motion.h2
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.35 }}
-          className="font-display text-xl font-semibold text-ink"
-        >
-          Registration confirmed
-        </motion.h2>
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.45 }}
-          className="mt-2 text-sm text-muted"
-        >
-          Your project code is
-        </motion.p>
-        <motion.p
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.55, duration: 0.4 }}
-          className="mt-1 font-display text-2xl font-bold tracking-wide text-marigold"
-        >
+
+        <h2 className="font-display text-xl font-semibold text-ink">Registration confirmed</h2>
+
+        <p className="mt-2 text-sm text-muted">Your project code is</p>
+        <p className="mt-1 font-display text-2xl font-bold tracking-wide text-marigold">
           {result.project_code}
-        </motion.p>
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.7 }}
-          className="mt-4 text-sm text-muted"
-        >
-          A verification email has been sent to{" "}
-          <span className="font-medium text-ink">{data.leader_email}</span>. The team
-          leader should check their inbox to set a portal password.
-        </motion.p>
+        </p>
+
+        <p className="mt-4 text-sm leading-relaxed text-ink-light">
+          You&apos;re all set — log in any time at{" "}
+          <span className="font-medium text-ink">/login</span> with{" "}
+          <span className="font-medium text-ink">{data.leader_email}</span> and the password you
+          just set.
+        </p>
+
+        {result.email_sent ? (
+          <p className="mt-2 text-xs text-muted">
+            We&apos;ve also sent a confirmation email with these details for your records.
+          </p>
+        ) : (
+          <p className="mt-2 rounded-lg border border-marigold/25 bg-marigold/10 px-3 py-2 text-xs text-marigold">
+            We couldn&apos;t send the confirmation email just now — save your login details above,
+            you won&apos;t need the email to access your portal.
+          </p>
+        )}
+
+        <div className="mt-6 flex items-center justify-between border-t border-line pt-5">
+          <a href="/" className="text-sm font-medium text-muted hover:text-ink">
+            ← Back to homepage
+          </a>
+          <a
+            href="/login?portal=participant"
+            className="rounded-lg bg-marigold px-4 py-2 text-sm font-semibold text-ink transition hover:brightness-95"
+          >
+            Log in to your portal →
+          </a>
+        </div>
       </motion.div>
     );
   }
@@ -338,7 +408,7 @@ export function RegistrationWizard() {
                       </p>
                       <div className="grid gap-3 sm:grid-cols-2">
                         <TextInput
-                          placeholder="Full name"
+                          placeholder="Full name *"
                           value={m.full_name}
                           onChange={(e) => {
                             const members = [...data.members];
@@ -347,7 +417,7 @@ export function RegistrationWizard() {
                           }}
                         />
                         <TextInput
-                          placeholder="Email"
+                          placeholder="Email *"
                           type="email"
                           value={m.email}
                           onChange={(e) => {
@@ -516,6 +586,40 @@ export function RegistrationWizard() {
                 ))}
               </Select>
             </Field>
+          </div>
+        )}
+
+        {step === 5 && (
+          <div className="space-y-5">
+            <h2 className="font-display text-lg font-semibold text-ink">
+              Review your details
+            </h2>
+            <p className="text-sm text-muted">
+              Check everything below carefully — you can go back and edit any step before
+              continuing.
+            </p>
+
+            <div className="space-y-4 rounded-lg border border-line bg-paper p-4 text-sm">
+              <PreviewRow label="Team name" value={data.team_name} />
+              <PreviewRow label="Team size" value={String(data.team_size)} />
+              <PreviewRow label="Team leader" value={`${data.leader_name} · ${data.leader_email} · ${data.leader_phone}`} />
+              {data.members.map((m, i) => (
+                <PreviewRow
+                  key={i}
+                  label={`Member ${i + 2}`}
+                  value={`${m.full_name} · ${m.email} · ${m.phone || "—"}`}
+                />
+              ))}
+              <PreviewRow label="College" value={`${data.college_name}, ${data.city}, ${data.state}`} />
+              <PreviewRow
+                label="Sector"
+                value={SECTORS.find((s) => s.prefix === data.sector_prefix)?.label || "—"}
+              />
+              <PreviewRow label="Project name" value={data.project_name} />
+              <PreviewRow label="Problem statement" value={data.problem_statement} />
+              <PreviewRow label="Proposed solution" value={data.proposed_solution} />
+              <PreviewRow label="Target beneficiaries" value={data.target_beneficiaries} />
+            </div>
 
             <div className="rounded-lg border border-line bg-paper p-4">
               <label className="flex items-start gap-2.5 text-sm text-ink-light">
@@ -531,6 +635,34 @@ export function RegistrationWizard() {
                 </span>
               </label>
             </div>
+          </div>
+        )}
+
+        {step === 6 && (
+          <div className="space-y-5">
+            <h2 className="font-display text-lg font-semibold text-ink">
+              Set your portal password
+            </h2>
+            <p className="text-sm text-muted">
+              This is what the team leader ({data.leader_email}) will use to log in — no
+              email link needed. You'll get a confirmation email with these details too.
+            </p>
+            <Field label="Password" required hint="At least 8 characters">
+              <TextInput
+                type="password"
+                value={data.leader_password}
+                onChange={(e) => update("leader_password", e.target.value)}
+                autoComplete="new-password"
+              />
+            </Field>
+            <Field label="Confirm password" required>
+              <TextInput
+                type="password"
+                value={data.leader_password_confirm}
+                onChange={(e) => update("leader_password_confirm", e.target.value)}
+                autoComplete="new-password"
+              />
+            </Field>
           </div>
         )}
           </motion.div>
@@ -550,12 +682,12 @@ export function RegistrationWizard() {
           >
             Back
           </button>
-          {step < 4 ? (
+          {step < 6 ? (
             <button
               onClick={next}
               className="rounded-lg bg-ink px-5 py-2.5 text-sm font-semibold text-paper transition hover:bg-ink-light"
             >
-              Continue
+              {step === 4 ? "Preview" : "Continue"}
             </button>
           ) : (
             <button
@@ -563,7 +695,7 @@ export function RegistrationWizard() {
               disabled={submitting}
               className="rounded-lg bg-marigold px-5 py-2.5 text-sm font-semibold text-ink transition hover:brightness-95 disabled:opacity-60"
             >
-              {submitting ? "Submitting..." : "Submit registration"}
+              {submitting ? "Submitting..." : "Complete registration"}
             </button>
           )}
         </div>

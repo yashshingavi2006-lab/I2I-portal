@@ -3,7 +3,7 @@ import { PageShell } from "@/components/page-shell";
 
 export default function RegisterPage() {
   return (
-    <PageShell particles={false} className="flex-1 px-4 py-12 sm:py-16">
+    <PageShell particles={false} theme="v0" className="flex-1 px-4 py-12 sm:py-16">
       <div className="mx-auto mb-10 max-w-2xl text-center">
         <p className="text-xs font-semibold uppercase tracking-widest text-marigold">
           I2I 2026-27 Registrations

@@ -1,40 +1,40 @@
-import { Hero } from "@/components/landing/hero";
-import { PortalSection } from "@/components/landing/portal-section";
-import { StatCounter } from "@/components/landing/stat-counter";
-import { Countdown } from "@/components/landing/countdown";
-import { ReachNetwork } from "@/components/landing/reach-network";
-import { PhaseJourney } from "@/components/landing/phase-journey";
-import { CursorTrail } from "@/components/landing/cursor-trail";
+import { SmoothScroll } from '@/components/smooth-scroll'
+import { Spotlight } from '@/components/spotlight'
+import { Navbar } from '@/components/navbar'
+import { Hero } from '@/components/sections/hero'
+import { About } from '@/components/sections/about'
+import { Journey } from '@/components/sections/journey'
+import { Awards } from '@/components/sections/awards'
+import { Portals } from '@/components/sections/portals'
+import { Statistics } from '@/components/sections/statistics'
+import { Startups } from '@/components/sections/startups'
+import { Mentors } from '@/components/sections/mentors'
+import { AnnualTimeline } from '@/components/sections/annual-timeline'
+import { Testimonials } from '@/components/sections/testimonials'
+import { Sponsors } from '@/components/sections/sponsors'
+import { Footer } from '@/components/sections/footer'
 
-export default function HomePage() {
+export default function Page() {
   return (
-    <main className="theme-ember flex-1">
-      <CursorTrail />
-      <Hero />
-
-      <section className="border-y border-ember-line px-4 py-16">
-        <div className="mx-auto grid max-w-3xl grid-cols-2 gap-8 sm:grid-cols-4">
-          <StatCounter value={800} suffix="+" label="Participants" />
-          <StatCounter value={6} label="Sectors" />
-          <StatCounter value={4} label="Phases" />
-          <StatCounter value={1} label="Valedictory" />
-        </div>
-      </section>
-
-      <PhaseJourney />
-
-      <section className="border-y border-ember-line px-4 py-16">
-        <Countdown />
-      </section>
-
-      <PortalSection />
-
-      <ReachNetwork />
-
-      <footer className="border-t border-ember-line px-4 py-8 text-center text-xs text-ember-muted">
-        I2I — Ignited Innovators of India · Bhau Institute of Innovation, Entrepreneurship
-        &amp; Leadership · COEP Technological University, Pune
-      </footer>
-    </main>
-  );
+    <div className="theme-v0">
+      <SmoothScroll>
+        <Spotlight />
+        <Navbar />
+        <main className="relative overflow-x-clip bg-background text-foreground">
+          <Hero />
+          <About />
+          <Journey />
+          <Awards />
+          <Portals />
+          <Statistics />
+          <Startups />
+          <Mentors />
+          <AnnualTimeline />
+          <Testimonials />
+          <Sponsors />
+        </main>
+        <Footer />
+      </SmoothScroll>
+    </div>
+  )
 }

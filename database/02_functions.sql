@@ -2,6 +2,7 @@
 -- PROJECT CODE AUTO-GENERATION
 -- Format: [SECTOR PREFIX][YEAR][2-digit sequential, resets each year per sector]
 -- e.g. ENV202601, ENV202602 ... ENV202699
+-- This is the official format — do not change the padding.
 -- ============================================================================
 
 create or replace function generate_project_code()
@@ -35,7 +36,7 @@ begin
 
   if v_next > 99 then
     raise exception
-      'Sector % has exceeded 99 registrations for %. Bump padding to 3 digits in generate_project_code().',
+      'Sector % has exceeded 99 registrations for %. This sector is at the official format''s limit — contact the dev team before this happens again.',
       v_prefix, v_year;
   end if;
 
