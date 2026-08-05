@@ -1,6 +1,7 @@
 import { SmoothScroll } from '@/components/smooth-scroll'
 import { Spotlight } from '@/components/spotlight'
 import { Navbar } from '@/components/navbar'
+import { IntroSplash } from '@/components/intro-splash'
 import { Hero } from '@/components/sections/hero'
 import { About } from '@/components/sections/about'
 import { Journey } from '@/components/sections/journey'
@@ -17,6 +18,7 @@ import { Footer } from '@/components/sections/footer'
 export default function Page() {
   return (
     <div className="theme-v0">
+      <IntroSplash />
       <SmoothScroll>
         <Spotlight />
         <Navbar />
