@@ -606,6 +606,21 @@ never actually reach the submission form their own Secretary was scoring.
 Now gated on the same `shortlisted_phase3 | funded | completed` set the rest
 of Phase 3+ already uses.
 
+## Bug fix: participants couldn't see their assigned mentor/ambassador
+
+**New setup step:** run `database/18_fix_project_assignments_leader_read.sql`
+after `17_fix_assignment_notification_type_cast.sql`.
+
+**Root cause found during end-to-end testing:** the participant's Phase 3
+panel shows "Assigned Mentor" / "Assigned Ambassador" by querying
+`project_assignments` straight from the browser, but the only `SELECT`
+policies on that table (`03_rls_policies.sql`) were for the assigned staff
+member themself or the Secretary — never for the team's own leader. RLS
+silently returned zero rows (not an error), so every participant saw
+"Not yet assigned" for both roles even once a real assignment existed.
+Added `assignments_team_leader_read`, letting a team's leader read their
+own team's assignment rows.
+
 ## Status: all 4 portals now have complete, real backend functionality
 
 Every major screen from the reference portal screenshots is now wired to
