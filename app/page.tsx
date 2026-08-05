@@ -4,6 +4,7 @@ import { Navbar } from '@/components/navbar'
 import { IntroSplash } from '@/components/intro-splash'
 import { Hero } from '@/components/sections/hero'
 import { About } from '@/components/sections/about'
+import { Reach } from '@/components/sections/reach'
 import { Journey } from '@/components/sections/journey'
 import { Awards } from '@/components/sections/awards'
 import { Portals } from '@/components/sections/portals'
@@ -25,6 +26,7 @@ export default function Page() {
         <main className="relative overflow-x-clip bg-background text-foreground">
           <Hero />
           <About />
+          <Reach />
           <Journey />
           <Awards />
           <Portals />
