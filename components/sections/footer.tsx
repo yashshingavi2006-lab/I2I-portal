@@ -4,7 +4,7 @@ import { Flame, ArrowUpRight } from 'lucide-react'
 import { MagneticButton } from '@/components/magnetic-button'
 import { GradientOrbs } from '@/components/background-fx'
 import { Reveal } from '@/components/motion-primitives'
-import { XIcon, LinkedInIcon, InstagramIcon, GithubIcon } from '@/components/social-icons'
+import { LinkedInIcon, InstagramIcon, YoutubeIcon } from '@/components/social-icons'
 
 const columns = [
   {
@@ -22,10 +22,9 @@ const columns = [
 ]
 
 const socials = [
-  { icon: XIcon, label: 'X' },
-  { icon: LinkedInIcon, label: 'LinkedIn' },
-  { icon: InstagramIcon, label: 'Instagram' },
-  { icon: GithubIcon, label: 'GitHub' },
+  { icon: LinkedInIcon, label: 'LinkedIn', href: 'https://www.linkedin.com/company/ignited-innovators-of-india/posts/?feedView=all' },
+  { icon: InstagramIcon, label: 'Instagram', href: 'https://www.instagram.com/i2i_coep/' },
+  { icon: YoutubeIcon, label: 'YouTube', href: 'https://www.youtube.com/@i2icoeptech' },
 ]
 
 export function Footer() {
@@ -75,7 +74,9 @@ export function Footer() {
               {socials.map((s) => (
                 <a
                   key={s.label}
-                  href="#top"
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label={s.label}
                   className="grid size-10 place-items-center rounded-full glass text-muted-foreground transition-colors hover:text-foreground"
                 >
