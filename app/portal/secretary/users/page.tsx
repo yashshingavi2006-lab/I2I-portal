@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { UsersAccessPanel } from "@/components/secretary/users-access-panel";
+import { BulkStaffImportPanel } from "@/components/secretary/bulk-staff-import-panel";
 
 export default async function UsersAccessPage() {
   const supabase = await createClient();
@@ -13,5 +14,10 @@ export default async function UsersAccessPage() {
     .select("id, full_name, email, role, head_title, is_active")
     .order("created_at", { ascending: false });
 
-  return <UsersAccessPanel initialStaff={staff ?? []} currentUserId={user?.id ?? null} />;
+  return (
+    <div>
+      <BulkStaffImportPanel />
+      <UsersAccessPanel initialStaff={staff ?? []} currentUserId={user?.id ?? null} />
+    </div>
+  );
 }
