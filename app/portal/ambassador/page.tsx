@@ -25,11 +25,23 @@ export default async function AmbassadorPortal() {
     redirect("/dashboard");
   }
 
-  // RLS already limits this to only the teams assigned to this staff member.
-  const { data: teamsRaw } = await supabase
-    .from("teams")
-    .select("id, project_code, team_name, college_name, status, leader_phone")
-    .order("created_at", { ascending: false });
+  // Explicitly scoped to project_assignments (Phase 3 mentor/ambassador),
+  // not just "whatever RLS allows" — RLS on teams also grants read access
+  // for Phase 2 reviewer delegations now, which is a different relationship
+  // and shouldn't leak into this Phase 3 portfolio workspace.
+  const { data: assignedTeamIds } = await supabase
+    .from("project_assignments")
+    .select("team_id")
+    .eq("staff_id", user.id);
+  const portfolioTeamIds = (assignedTeamIds ?? []).map((a) => a.team_id);
+
+  const { data: teamsRaw } = portfolioTeamIds.length
+    ? await supabase
+        .from("teams")
+        .select("id, project_code, team_name, college_name, status, leader_phone")
+        .in("id", portfolioTeamIds)
+        .order("created_at", { ascending: false })
+    : { data: [] };
 
   // Phase 2 pitch deck + approved funding, joined manually since it's a
   // separate table (kept simple rather than a Postgres view for now).
