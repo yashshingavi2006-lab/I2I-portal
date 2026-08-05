@@ -1,0 +1,267 @@
+@import "tailwindcss";
+
+:root {
+  --background: #FAF9F6;
+  --foreground: #16213E;
+  --ink: #16213E;        /* deep indigo — headers, primary actions */
+  --ink-light: #2B3A63;
+  --marigold: #D98C2B;   /* accent — CTAs, active states, project-code chips */
+  --marigold-light: #F0C888;
+  --paper: #FAF9F6;      /* warm paper background, not stark white */
+  --surface: #FFFFFF;    /* cards, inputs, elevated panels */
+  --line: #E4E0D6;       /* hairline borders */
+  --muted: #6B7280;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-ink: var(--ink);
+  --color-ink-light: var(--ink-light);
+  --color-marigold: var(--marigold);
+  --color-marigold-light: var(--marigold-light);
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-line: var(--line);
+  --color-muted: var(--muted);
+  --color-ember-bg: var(--ember-bg, #0A0C10);
+  --color-ember-bg-elevated: var(--ember-bg-elevated, #14171F);
+  --color-ember-text: var(--ember-text, #F4F1EA);
+  --color-ember-muted: var(--ember-muted, #9B958A);
+  --color-ember-accent: var(--ember-accent, #F2A93C);
+  --color-ember-accent-dim: var(--ember-accent-dim, #B5762A);
+  --color-ember-line: var(--ember-line, rgba(244, 241, 234, 0.1));
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-space-grotesk);
+  --font-mono: var(--font-jetbrains-mono);
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* ----------------------------------------------------------------------
+   "Ember" dark theme. Wrap any page/section in class="theme-ember" and
+   every component using bg-paper / bg-surface / text-ink / border-line /
+   text-muted automatically goes dark — because those utilities all read
+   from the SAME css variable names, which this class overrides for
+   everything nested inside it. No per-component dark-mode props needed.
+   Currently applied to: landing page, auth pages, all 4 portal dashboards.
+   Left on the light theme: the registration wizard (public form, optimized
+   for readability while 800 people fill it in on their phones).
+   ---------------------------------------------------------------------- */
+.theme-ember {
+  --ink: #F4F1EA;
+  --ink-light: #C9C4B8;
+  --paper: #0A0C10;
+  --surface: #14171F;
+  --line: rgba(244, 241, 234, 0.12);
+  --muted: #B0AA9C;
+  --marigold: #F2A93C;
+  --marigold-light: #F5C878;
+
+  --ember-bg: #0A0C10;
+  --ember-bg-elevated: #14171F;
+  --ember-text: #F4F1EA;
+  --ember-muted: #B0AA9C;
+  --ember-accent: #F2A93C;
+  --ember-accent-dim: #B5762A;
+  --ember-line: rgba(244, 241, 234, 0.1);
+
+  background: var(--paper);
+  color: var(--ink);
+}
+
+@keyframes ember-rise {
+  0% {
+    transform: translateY(0) translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-100vh) translateX(20px);
+    opacity: 0;
+  }
+}
+
+@keyframes ember-glow-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+@keyframes spark-fade {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.3) translateY(-20px);
+  }
+}
+
+/* Subtle film grain — makes dark sections feel designed, not just "dark mode" */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  opacity: 0.04;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ============================================================================
+   v0 LANDING PAGE THEME — scoped to .theme-v0 (wraps the landing page only).
+   Uses v0's ORIGINAL variable names (--background, --card, --primary, etc.)
+   UNCHANGED, because the copied v0 components reference Tailwind utility
+   classes like bg-background/text-primary directly — renaming the variables
+   would silently break those classes. Safe to keep original names globally
+   because grep confirmed nothing elsewhere in this codebase uses
+   bg-background/text-foreground/etc., and the actual VALUES only apply
+   inside .theme-v0 scope anyway (not defined at :root), so it cannot leak
+   into or override our --paper/--ink/--marigold system used everywhere else.
+   ============================================================================ */
+@import 'tw-animate-css';
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --animate-marquee: marquee 40s linear infinite;
+  --animate-float: float 8s ease-in-out infinite;
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0) translateX(0); }
+    50% { transform: translateY(-24px) translateX(12px); }
+  }
+}
+
+.theme-v0 {
+  color-scheme: dark;
+
+  --amber: #F2A93C;
+  --amber-soft: #F5C878;
+  --amber-deep: #B5762A;
+
+  --background: oklch(0.16 0.006 264);
+  --foreground: #FAF8F3;      /* near-white, was oklch(0.97 0.004 264) — plain hex renders reliably bright across browsers/monitors */
+  --card: oklch(0.2 0.007 264);
+  --card-foreground: #FAF8F3;
+  --popover: oklch(0.18 0.007 264);
+  --popover-foreground: #FAF8F3;
+  --primary: #F2A93C;
+  --primary-foreground: oklch(0.18 0.02 60);
+  --secondary: oklch(0.24 0.008 264);
+  --secondary-foreground: #FAF8F3;
+  --muted: oklch(0.24 0.008 264);
+  --muted-foreground: #D9D3C4;  /* was oklch(0.82 0.01 264) — that low-chroma oklch gray was reading as near-invisible on some displays; this is the same warm light tone rendered as plain hex */
+  --accent: #F2A93C;
+  --accent-foreground: oklch(0.18 0.02 60);
+  --destructive: oklch(0.62 0.22 25);
+  --border: oklch(1 0 0 / 16%);
+  --input: oklch(1 0 0 / 18%);
+  --ring: #F2A93C;
+  --radius: 0.75rem;
+  --font-display: var(--font-sora);
+
+  /* ---- Bridge for the older --paper/--ink/--marigold and --ember-*
+     token systems that the portal dashboards (secretary/mentor/ambassador/
+     participant) already use via bg-surface, text-marigold, border-line,
+     bg-ember-bg-elevated, etc. Pointing these at the same v0 values means
+     every portal component picks up the new look with zero markup changes. */
+  --ink: var(--foreground);
+  --ink-light: var(--muted-foreground);
+  --paper: var(--background);
+  --surface: var(--card);
+  --line: var(--border);
+  --muted: var(--muted-foreground);
+  --marigold: var(--amber);
+  --marigold-light: var(--amber-soft);
+
+  --ember-bg: var(--background);
+  --ember-bg-elevated: var(--card);
+  --ember-text: var(--foreground);
+  --ember-muted: var(--muted-foreground);
+  --ember-accent: var(--amber);
+  --ember-accent-dim: var(--amber-deep);
+  --ember-line: var(--border);
+
+  background: var(--background);
+  color: var(--foreground);
+  font-feature-settings: 'ss01', 'cv01', 'cv03';
+}
+
+.theme-v0 ::selection {
+  background: color-mix(in oklch, var(--amber) 30%, transparent);
+  color: var(--foreground);
+}
+
+.theme-v0 .glass {
+  background: color-mix(in oklch, var(--card) 55%, transparent);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid var(--border);
+}
+
+.theme-v0 .glass-strong {
+  background: color-mix(in oklch, var(--card) 78%, transparent);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--border);
+}
+
+.theme-v0 .text-gradient-amber {
+  background: linear-gradient(120deg, var(--amber-soft) 0%, var(--amber) 45%, var(--amber-deep) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.theme-v0 .grid-texture {
+  background-image: linear-gradient(
+      to right,
+      color-mix(in oklch, var(--foreground) 4%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in oklch, var(--foreground) 4%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 64px 64px;
+}
+
+.theme-v0 .radial-fade {
+  mask-image: radial-gradient(ellipse 60% 60% at 50% 40%, #000 40%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 60% 60% at 50% 40%, #000 40%, transparent 100%);
+}
