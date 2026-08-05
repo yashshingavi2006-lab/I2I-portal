@@ -182,7 +182,6 @@ body {
   --primary-foreground: oklch(0.18 0.02 60);
   --secondary: oklch(0.24 0.008 264);
   --secondary-foreground: #FAF8F3;
-  --muted: oklch(0.24 0.008 264);
   --muted-foreground: #D9D3C4;  /* was oklch(0.82 0.01 264) — that low-chroma oklch gray was reading as near-invisible on some displays; this is the same warm light tone rendered as plain hex */
   --accent: #F2A93C;
   --accent-foreground: oklch(0.18 0.02 60);
