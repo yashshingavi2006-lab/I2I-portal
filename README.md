@@ -579,6 +579,33 @@ spreadsheet export's columns were updated the same way.
   above, or the existing single-project modal (which, until this change,
   didn't notify participants of Phase 3 selection at all).
 
+## Bug fix: "Assign Mentor & Ambassador" always failed
+
+**New setup step:** run `database/17_fix_assignment_notification_type_cast.sql`
+after `16_phase3_review_and_notify.sql`.
+
+**Root cause found during end-to-end testing against a live project:** every
+attempt to assign a mentor or ambassador from the Secretary's Phase 3 screen
+failed with `column "type" is of type notification_type but expression is of
+type text`, and the whole assignment silently rolled back. The
+`after_assignment_created()` trigger (`06_phase3_automation.sql`) picks the
+notification type with a `CASE ... THEN 'mentor_assigned' ELSE
+'ambassador_assigned' END` expression — Postgres infers a bare `CASE`
+expression's type as `text` rather than as an untyped literal, and `text`
+doesn't implicitly cast to the `notification_type` enum, so the insert into
+`notification_queue` (and therefore the whole triggering insert into
+`project_assignments`) failed every time. Fixed by casting the `CASE`
+result to `::notification_type` explicitly.
+
+**Also fixed:** the participant's Phase 4 final-submission panel
+(`components/participant/workspace-tab.tsx`) was gated on
+`teams.status in ('funded', 'completed')`, but no code path anywhere in the
+app ever sets a team to either of those values — the Secretary's own Phase 4
+scoring table already lists `shortlisted_phase3` teams, so participants could
+never actually reach the submission form their own Secretary was scoring.
+Now gated on the same `shortlisted_phase3 | funded | completed` set the rest
+of Phase 3+ already uses.
+
 ## Status: all 4 portals now have complete, real backend functionality
 
 Every major screen from the reference portal screenshots is now wired to

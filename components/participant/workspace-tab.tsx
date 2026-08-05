@@ -76,7 +76,7 @@ export function WorkspaceTab({ teamId, status }: { teamId: string; status: strin
       ) : inPhase3Plus ? (
         <div className="space-y-4">
           <Phase3Panel teamId={teamId} status={status} />
-          {["funded", "completed"].includes(status) && <Phase4Panel teamId={teamId} />}
+          {inPhase3Plus && <Phase4Panel teamId={teamId} />}
         </div>
       ) : (
         <div className="rounded-2xl border border-dashed border-line bg-surface p-8 text-center">
