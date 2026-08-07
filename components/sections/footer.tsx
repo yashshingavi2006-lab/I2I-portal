@@ -9,15 +9,34 @@ import { LinkedInIcon, InstagramIcon, YoutubeIcon } from '@/components/social-ic
 const columns = [
   {
     title: 'Portals',
-    links: ['Secretary', 'Participants', 'Mentors', 'Ambassadors'],
+    links: [
+      { label: 'Secretary', href: '/login?portal=secretary' },
+      { label: 'Participants', href: '/login?portal=participant' },
+      { label: 'Mentors', href: '/login?portal=mentor' },
+      { label: 'Ambassadors', href: '/login?portal=ambassador' },
+    ],
   },
   {
     title: 'Ecosystem',
-    links: ['Startups', 'Mentors', 'Partners', 'Sponsors'],
+    links: [
+      { label: 'Startups', href: '#startups' },
+      { label: 'Mentors', href: '#mentors' },
+      // No dedicated "Partners" section exists yet — pointed at Sponsors for
+      // now since the two overlap here; say the word if these should differ.
+      { label: 'Partners', href: '#sponsors' },
+      { label: 'Sponsors', href: '#sponsors' },
+    ],
   },
   {
     title: 'Institute',
-    links: ['About Bhau', 'COEP Tech', 'Guidelines & Policies', 'Contact'],
+    links: [
+      // TODO: About Bhau / COEP Tech / Contact need real URLs — waiting on
+      // the i2i.org.in reference to fill these in rather than guessing.
+      { label: 'About Bhau', href: '#about' },
+      { label: 'COEP Tech', href: '#about' },
+      { label: 'Guidelines & Policies', href: '/guidelines' },
+      { label: 'Contact', href: '#about' },
+    ],
   },
 ]
 
@@ -47,7 +66,7 @@ export function Footer() {
                   ecosystem.
                 </p>
               </div>
-              <MagneticButton href="#top">
+              <MagneticButton href="/register">
                 Apply Now
                 <ArrowUpRight className="size-4" />
               </MagneticButton>
@@ -93,11 +112,11 @@ export function Footer() {
               </p>
               {col.links.map((link) => (
                 <a
-                  key={link}
-                  href={link === 'Guidelines & Policies' ? '/guidelines' : '#top'}
+                  key={link.label}
+                  href={link.href}
                   className="text-sm text-foreground/70 transition-colors hover:text-primary"
                 >
-                  {link}
+                  {link.label}
                 </a>
               ))}
             </nav>
