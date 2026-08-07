@@ -164,9 +164,26 @@ export async function GET() {
       }
     }
 
-    function link(path: string | null) {
+    function link(path: string | null): string | { text: string; hyperlink: string } {
       if (!path) return "Not uploaded";
-      return signedUrlByPath.get(path) ?? "Link unavailable — check Storage manually";
+      const url = signedUrlByPath.get(path);
+      if (!url) return "Link unavailable — check Storage manually";
+      return { text: "View", hyperlink: url };
+    }
+
+    // The UI caps participants at one extra document, so a single real
+    // hyperlink covers the normal case; anything beyond that falls back to
+    // a plain-text list rather than a cell ExcelJS can't represent as one
+    // clickable link with multiple distinct URLs.
+    function otherDocsCell(docs: OtherDoc[]): string | { text: string; hyperlink: string } {
+      if (docs.length === 0) return "None";
+      if (docs.length === 1) {
+        const url = docs[0].path ? signedUrlByPath.get(docs[0].path) : null;
+        return url ? { text: docs[0].name, hyperlink: url } : `${docs[0].name}: link unavailable`;
+      }
+      return docs
+        .map((d) => `${d.name}: ${d.path ? (signedUrlByPath.get(d.path) ?? "link unavailable") : "not uploaded"}`)
+        .join("\n");
     }
 
     // ---- Build the workbook ----
@@ -245,9 +262,7 @@ export async function GET() {
           bills_link: link(r.bills_path),
           passbook_link: link(r.passbook_path),
           pan_link: link(r.pan_path),
-          other_docs_links: r.other_documents.length
-            ? r.other_documents.map((d) => `${d.name}: ${link(d.path)}`).join("\n")
-            : "None",
+          other_docs_links: otherDocsCell(r.other_documents),
         });
         // Real dropdown in Excel/Sheets for the decision column — keeps the
         // Secretary from typing free text that then fails to parse back on
