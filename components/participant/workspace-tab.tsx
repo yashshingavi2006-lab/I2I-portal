@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { FileUploadField } from "./file-upload-field";
 import { OtherDocumentsField, type OtherDocument } from "./other-documents-field";
+import { WeeklyTargets } from "@/components/weekly-targets";
 
 type Phase2Data = {
   id: string | null;
@@ -886,6 +887,8 @@ function Phase3Panel({ teamId, status }: { teamId: string; status: string }) {
           <p className="mt-1 text-sm font-medium text-ink">{ambassador?.staff_name ?? "Not yet assigned"}</p>
         </div>
       </div>
+
+      <WeeklyTargets teamId={teamId} readOnly={false} locked={locked} />
 
       <div className="rounded-2xl border border-line bg-surface p-6">
         <h3 className="font-display text-base font-semibold text-ink">Timeline</h3>
