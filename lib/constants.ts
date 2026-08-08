@@ -49,14 +49,16 @@ export const TEAM_SIZE_OPTIONS = [1, 2, 3] as const;
 export const REGISTRATION_DEADLINE = new Date("2026-08-31T23:59:59+05:30");
 
 // Phase 3 "Weekly Development Targets" — 8 fixed weeks spanning December and
-// January. Only the date ranges live in code; the plans themselves are
-// stored per team in the `weekly_targets` table (database/20_weekly_targets.sql).
+// January, aligned to real Monday-Sunday calendar weeks (Dec 1, 2026 falls
+// on a Tuesday, so Week 1 starts on the Monday of that week, Nov 30). Only
+// the date ranges live in code; the plans themselves are stored per team in
+// the `weekly_targets` table (database/20_weekly_targets.sql).
 // Update these if the actual program dates for a given cohort differ.
 export const WEEKLY_TARGET_WEEKS: { week: number; start: string; end: string }[] = Array.from(
   { length: 8 },
   (_, i) => {
-    const start = new Date(Date.UTC(2026, 11, 1 + i * 7)); // Dec 1, 2026 (UTC, date-only)
-    const end = new Date(Date.UTC(2026, 11, 1 + i * 7 + 6));
+    const start = new Date(Date.UTC(2026, 10, 30 + i * 7)); // Mon Nov 30, 2026 (UTC, date-only)
+    const end = new Date(Date.UTC(2026, 10, 30 + i * 7 + 6));
     return { week: i + 1, start: start.toISOString().slice(0, 10), end: end.toISOString().slice(0, 10) };
   }
 );
