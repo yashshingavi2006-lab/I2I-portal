@@ -1,77 +1,98 @@
 "use client";
 
-import { useMemo, useRef } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, Sparkles } from "@react-three/drei";
-import * as THREE from "three";
+import { useMemo } from "react";
+import { Canvas } from "@react-three/fiber";
+import { Float, Sparkles, Environment, Lightformer, MeshTransmissionMaterial } from "@react-three/drei";
 
 const AMBER = "#F2A93C";
 const AMBER_SOFT = "#F5C878";
 const AMBER_DEEP = "#B5762A";
-const INK_LIGHT = "#8A8578";
 
 function seededRandom(seed: number) {
   const x = Math.sin(seed) * 10000;
   return x - Math.floor(x);
 }
 
-function Node({ position, scale, color }: { position: [number, number, number]; scale: number; color: string }) {
+type Shape = "sphere" | "icosahedron" | "torus";
+
+function GlassShape({
+  position,
+  scale,
+  shape,
+  tint,
+  floatSpeed,
+}: {
+  position: [number, number, number];
+  scale: number;
+  shape: Shape;
+  tint: string;
+  floatSpeed: number;
+}) {
   return (
-    <Float speed={1.4} rotationIntensity={1.1} floatIntensity={1.6}>
+    <Float speed={floatSpeed} rotationIntensity={0.5} floatIntensity={1.1}>
       <mesh position={position} scale={scale}>
-        <icosahedronGeometry args={[1, 0]} />
-        <meshStandardMaterial color={color} roughness={0.35} metalness={0.15} emissive={color} emissiveIntensity={0.15} />
+        {shape === "sphere" && <sphereGeometry args={[1, 64, 64]} />}
+        {shape === "icosahedron" && <icosahedronGeometry args={[1, 4]} />}
+        {shape === "torus" && <torusGeometry args={[0.9, 0.32, 32, 100]} />}
+        <MeshTransmissionMaterial
+          color={tint}
+          thickness={0.4}
+          roughness={0.04}
+          transmission={1}
+          ior={1.2}
+          chromaticAberration={0.03}
+          anisotropy={0.1}
+          distortion={0.1}
+          distortionScale={0.15}
+          temporalDistortion={0.03}
+          clearcoat={1}
+          attenuationColor={tint}
+          attenuationDistance={2.5}
+        />
       </mesh>
     </Float>
   );
 }
 
-function NetworkLines({ nodes }: { nodes: [number, number, number][] }) {
-  const geometry = useMemo(() => {
-    const points: THREE.Vector3[] = [];
-    // Connect each node to its two nearest neighbors for a network feel.
-    for (let i = 0; i < nodes.length; i++) {
-      const distances = nodes
-        .map((n, j) => ({ j, d: j === i ? Infinity : new THREE.Vector3(...n).distanceTo(new THREE.Vector3(...nodes[i])) }))
-        .sort((a, b) => a.d - b.d);
-      for (const { j } of distances.slice(0, 2)) {
-        points.push(new THREE.Vector3(...nodes[i]), new THREE.Vector3(...nodes[j]));
-      }
-    }
-    return new THREE.BufferGeometry().setFromPoints(points);
-  }, [nodes]);
-
-  const ref = useRef<THREE.LineSegments>(null);
-  useFrame((state) => {
-    if (ref.current) ref.current.rotation.y = state.clock.elapsedTime * 0.03;
-  });
-
+// Procedural studio lighting (no external HDR fetch) so the glass material
+// has something to reflect/refract.
+function GlassStudio() {
   return (
-    <lineSegments ref={ref} geometry={geometry}>
-      <lineBasicMaterial color={AMBER_SOFT} transparent opacity={0.18} />
-    </lineSegments>
+    <Environment resolution={256}>
+      <group rotation={[-Math.PI / 3, 0, 0]}>
+        <Lightformer form="circle" intensity={4} color={AMBER_SOFT} position={[0, 4, -4]} scale={6} />
+        <Lightformer form="circle" intensity={2} color="#ffffff" position={[-4, 2, 2]} scale={4} />
+        <Lightformer form="circle" intensity={2.5} color={AMBER} position={[4, -2, 2]} scale={4} />
+        <Lightformer form="ring" intensity={3} color={AMBER_DEEP} position={[0, -4, 2]} scale={8} rotation={[Math.PI / 2, 0, 0]} />
+      </group>
+    </Environment>
   );
 }
 
-function NetworkScene() {
-  const nodes = useMemo<[number, number, number][]>(() => {
-    return Array.from({ length: 9 }, (_, i) => [
-      (seededRandom(i * 3.1) - 0.5) * 8,
-      (seededRandom(i * 7.7) - 0.5) * 5,
-      (seededRandom(i * 5.3) - 0.5) * 3,
-    ]);
-  }, []);
-  const colors = [AMBER, AMBER_SOFT, AMBER_DEEP];
+function HeroScene() {
+  // The two-column hero content (headline + paragraph on the left, map card
+  // on the right) occupies roughly world-y between +2.2 and -2.9 at this
+  // camera distance — nearly the full width. So shapes are confined to the
+  // horizontal margin strips above and below that band (not "far left/right",
+  // which still lands on top of the columns), and kept small.
+  const shapes = useMemo<{ position: [number, number, number]; scale: number; shape: Shape; tint: string; floatSpeed: number }[]>(
+    () => [
+      { position: [-3.2, 3.6, -4], scale: 0.32, shape: "icosahedron", tint: AMBER, floatSpeed: 1.1 },
+      { position: [3.6, 3.3, -5], scale: 0.24, shape: "sphere", tint: AMBER_SOFT, floatSpeed: 1.4 },
+      { position: [-2.8, -3.8, -3.5], scale: 0.2, shape: "torus", tint: AMBER_DEEP, floatSpeed: 1.7 },
+      { position: [3.2, -3.6, -4.5], scale: 0.22, shape: "sphere", tint: AMBER, floatSpeed: 1.9 },
+    ],
+    []
+  );
 
   return (
     <>
-      <ambientLight intensity={0.7} />
-      <pointLight position={[5, 5, 5]} intensity={60} color={AMBER_SOFT} />
-      <NetworkLines nodes={nodes} />
-      {nodes.map((pos, i) => (
-        <Node key={i} position={pos} scale={0.18 + seededRandom(i * 1.9) * 0.22} color={colors[i % colors.length]} />
+      <ambientLight intensity={0.9} />
+      <GlassStudio />
+      {shapes.map((s, i) => (
+        <GlassShape key={i} {...s} />
       ))}
-      <Sparkles count={40} scale={9} size={2} speed={0.3} color={INK_LIGHT} opacity={0.4} />
+      <Sparkles count={35} scale={9} size={1.8} speed={0.25} color={AMBER_SOFT} opacity={0.35} />
     </>
   );
 }
@@ -94,7 +115,7 @@ export default function Scene3DInner({ variant }: { variant: "network" | "field"
       gl={{ antialias: true, alpha: true }}
       style={{ width: "100%", height: "100%" }}
     >
-      {variant === "network" ? <NetworkScene /> : <FieldScene />}
+      {variant === "network" ? <HeroScene /> : <FieldScene />}
     </Canvas>
   );
 }
