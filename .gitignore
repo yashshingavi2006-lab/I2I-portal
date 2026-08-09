@@ -6,3 +6,4 @@ node_modules/
 .DS_Store
 npm-debug.log*
 .github/workflows/keep-alive.yml
+__pycache__/
