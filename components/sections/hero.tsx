@@ -1,6 +1,7 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { useRef } from 'react'
+import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion'
 import { ArrowUpRight, Sparkles } from 'lucide-react'
 import { AnimatedText } from '@/components/motion-primitives'
 import { MagneticButton } from '@/components/magnetic-button'
@@ -10,13 +11,32 @@ import { Scene3DBackground } from '@/components/scene-3d'
 const easeOut = [0.16, 1, 0.3, 1] as const
 
 export function Hero() {
+  const sectionRef = useRef<HTMLElement>(null)
+  const shouldReduceMotion = useReducedMotion()
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start start', 'end start'],
+  })
+  // The crystal drifts down slower than the page scrolls past it (depth
+  // parallax) and fades out toward the end of the section, instead of
+  // just scrolling off at the same rate as the text beside it.
+  const crystalY = useTransform(scrollYProgress, [0, 1], shouldReduceMotion ? [0, 0] : [0, 140])
+  const crystalOpacity = useTransform(
+    scrollYProgress,
+    [0, 0.8, 1],
+    shouldReduceMotion ? [0.7, 0.7, 0.7] : [0.7, 0.7, 0]
+  )
+
   return (
     <section
+      ref={sectionRef}
       id="top"
       className="relative flex min-h-screen items-center overflow-hidden bg-[#050506] pt-28 pb-16"
     >
       <div className="absolute inset-0 grid-texture radial-fade opacity-60" aria-hidden="true" />
-      <Scene3DBackground variant="network" className="opacity-70" />
+      <motion.div style={{ y: crystalY, opacity: crystalOpacity }} className="absolute inset-0">
+        <Scene3DBackground variant="network" />
+      </motion.div>
       <GradientOrbs />
       <Particles />
 

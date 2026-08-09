@@ -2,6 +2,7 @@ import { SmoothScroll } from '@/components/smooth-scroll'
 import { Spotlight } from '@/components/spotlight'
 import { Navbar } from '@/components/navbar'
 import { IntroSplash } from '@/components/intro-splash'
+import { ScrollProgress } from '@/components/scroll-progress'
 import { Hero } from '@/components/sections/hero'
 import { About } from '@/components/sections/about'
 import { Reach } from '@/components/sections/reach'
@@ -20,6 +21,7 @@ export default function Page() {
   return (
     <div className="theme-v0">
       <IntroSplash />
+      <ScrollProgress />
       <SmoothScroll>
         <Spotlight />
         <Navbar />
