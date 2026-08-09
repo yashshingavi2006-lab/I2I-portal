@@ -6,6 +6,7 @@ import { AnimatedText } from '@/components/motion-primitives'
 import { MagneticButton } from '@/components/magnetic-button'
 import { GradientOrbs, Particles } from '@/components/background-fx'
 import { ReachMap } from '@/components/reach-map'
+import { Scene3DBackground } from '@/components/scene-3d'
 
 const easeOut = [0.16, 1, 0.3, 1] as const
 
@@ -16,6 +17,7 @@ export function Hero() {
       className="relative flex min-h-screen items-center overflow-hidden pt-28 pb-16"
     >
       <div className="absolute inset-0 grid-texture radial-fade opacity-60" aria-hidden="true" />
+      <Scene3DBackground variant="network" className="opacity-70" />
       <GradientOrbs />
       <Particles />
 
