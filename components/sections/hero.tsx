@@ -14,7 +14,7 @@ export function Hero() {
   return (
     <section
       id="top"
-      className="relative flex min-h-screen items-center overflow-hidden pt-28 pb-16"
+      className="relative flex min-h-screen items-center overflow-hidden bg-[#050506] pt-28 pb-16"
     >
       <div className="absolute inset-0 grid-texture radial-fade opacity-60" aria-hidden="true" />
       <Scene3DBackground variant="network" className="opacity-70" />
