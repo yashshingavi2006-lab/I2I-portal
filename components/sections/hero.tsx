@@ -5,7 +5,7 @@ import { ArrowUpRight, Sparkles } from 'lucide-react'
 import { AnimatedText } from '@/components/motion-primitives'
 import { MagneticButton } from '@/components/magnetic-button'
 import { GradientOrbs, Particles } from '@/components/background-fx'
-import { ReachMap } from '@/components/reach-map'
+import { InnovationNetwork } from '@/components/innovation-network'
 
 const easeOut = [0.16, 1, 0.3, 1] as const
 
@@ -99,7 +99,7 @@ export function Hero() {
         >
           <div className="glass absolute inset-0 rounded-[2rem]" />
           <div className="absolute inset-4 overflow-hidden rounded-[1.5rem]">
-            <ReachMap compact />
+            <InnovationNetwork />
           </div>
           <div className="glass-strong absolute -bottom-4 left-6 flex items-center gap-3 rounded-2xl px-4 py-3">
             <span className="relative flex size-2.5">

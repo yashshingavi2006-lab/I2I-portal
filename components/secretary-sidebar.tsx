@@ -14,8 +14,6 @@ const COMPETITION_FLOW = [
 const MANAGEMENT = [
   { href: "/portal/secretary/edit-requests", label: "Edit Requests" },
   { href: "/portal/secretary/users", label: "Users & Access" },
-  { href: "/portal/secretary/phase-engine", label: "Phase Engine" },
-  { href: "/portal/secretary/email-templates", label: "Email Templates" },
 ];
 
 export function SecretarySidebar({ name, email }: { name: string; email: string }) {

@@ -4,46 +4,28 @@ import { Flame, ArrowUpRight } from 'lucide-react'
 import { MagneticButton } from '@/components/magnetic-button'
 import { GradientOrbs } from '@/components/background-fx'
 import { Reveal } from '@/components/motion-primitives'
-import { LinkedInIcon, InstagramIcon, YoutubeIcon } from '@/components/social-icons'
+import { XIcon, LinkedInIcon, InstagramIcon, GithubIcon } from '@/components/social-icons'
 
 const columns = [
   {
     title: 'Portals',
-    links: [
-      { label: 'Secretary', href: '/login?portal=secretary' },
-      { label: 'Participants', href: '/login?portal=participant' },
-      { label: 'Mentors', href: '/login?portal=mentor' },
-      { label: 'Ambassadors', href: '/login?portal=ambassador' },
-    ],
+    links: ['Secretary', 'Participants', 'Mentors', 'Ambassadors'],
   },
   {
     title: 'Ecosystem',
-    links: [
-      { label: 'Startups', href: '#startups' },
-      { label: 'Mentors', href: '#mentors' },
-      // No dedicated "Partners" section exists yet — pointed at Sponsors for
-      // now since the two overlap here; say the word if these should differ.
-      { label: 'Partners', href: '#sponsors' },
-      { label: 'Sponsors', href: '#sponsors' },
-    ],
+    links: ['Startups', 'Mentors', 'Partners', 'Sponsors'],
   },
   {
     title: 'Institute',
-    links: [
-      // TODO: About Bhau / COEP Tech / Contact need real URLs — waiting on
-      // the i2i.org.in reference to fill these in rather than guessing.
-      { label: 'About Bhau', href: '#about' },
-      { label: 'COEP Tech', href: '#about' },
-      { label: 'Guidelines & Policies', href: '/guidelines' },
-      { label: 'Contact', href: '#about' },
-    ],
+    links: ['About Bhau', 'COEP Tech', 'Guidelines & Policies', 'Contact'],
   },
 ]
 
 const socials = [
-  { icon: LinkedInIcon, label: 'LinkedIn', href: 'https://www.linkedin.com/company/ignited-innovators-of-india/posts/?feedView=all' },
-  { icon: InstagramIcon, label: 'Instagram', href: 'https://www.instagram.com/i2i_coep/' },
-  { icon: YoutubeIcon, label: 'YouTube', href: 'https://www.youtube.com/@i2icoeptech' },
+  { icon: XIcon, label: 'X' },
+  { icon: LinkedInIcon, label: 'LinkedIn' },
+  { icon: InstagramIcon, label: 'Instagram' },
+  { icon: GithubIcon, label: 'GitHub' },
 ]
 
 export function Footer() {
@@ -66,7 +48,7 @@ export function Footer() {
                   ecosystem.
                 </p>
               </div>
-              <MagneticButton href="/register">
+              <MagneticButton href="#top">
                 Apply Now
                 <ArrowUpRight className="size-4" />
               </MagneticButton>
@@ -93,9 +75,7 @@ export function Footer() {
               {socials.map((s) => (
                 <a
                   key={s.label}
-                  href={s.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="#top"
                   aria-label={s.label}
                   className="grid size-10 place-items-center rounded-full glass text-muted-foreground transition-colors hover:text-foreground"
                 >
@@ -112,11 +92,11 @@ export function Footer() {
               </p>
               {col.links.map((link) => (
                 <a
-                  key={link.label}
-                  href={link.href}
+                  key={link}
+                  href={link === 'Guidelines & Policies' ? '/guidelines' : '#top'}
                   className="text-sm text-foreground/70 transition-colors hover:text-primary"
                 >
-                  {link.label}
+                  {link}
                 </a>
               ))}
             </nav>

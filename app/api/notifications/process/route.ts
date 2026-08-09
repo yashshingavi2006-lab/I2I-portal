@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
 
   for (const item of pending ?? []) {
     try {
-      await dispatchNotification(item, admin);
+      await dispatchNotification(item);
       await admin
         .from("notification_queue")
         .update({ status: "sent", sent_at: new Date().toISOString() })
