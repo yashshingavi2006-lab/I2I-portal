@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
+import { WeeklyTargets } from "@/components/weekly-targets";
 
 type AssignedTeam = {
   id: string;
@@ -195,6 +196,10 @@ export function PortfolioWorkspace({
                 </a>
               )}
             </div>
+          </div>
+
+          <div className="mt-4">
+            <WeeklyTargets teamId={selected.id} readOnly />
           </div>
 
           {/* Awaiting grading banner (mentor only) */}

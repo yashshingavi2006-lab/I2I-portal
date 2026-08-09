@@ -78,7 +78,7 @@ export function WorkspaceTab({ teamId, status }: { teamId: string; status: strin
       ) : inPhase3Plus ? (
         <div className="space-y-4">
           <Phase3Panel teamId={teamId} status={status} />
-          {["funded", "completed"].includes(status) && <Phase4Panel teamId={teamId} />}
+          {inPhase3Plus && <Phase4Panel teamId={teamId} />}
         </div>
       ) : status === "rejected" ? (
         <RejectedPanel teamId={teamId} />
@@ -890,6 +890,8 @@ function Phase3Panel({ teamId, status }: { teamId: string; status: string }) {
           <p className="mt-1 text-sm font-medium text-ink">{ambassador?.staff_name ?? "Not yet assigned"}</p>
         </div>
       </div>
+
+      <WeeklyTargets teamId={teamId} readOnly={false} locked={locked} />
 
       <div className="rounded-2xl border border-line bg-surface p-6">
         <h3 className="font-display text-base font-semibold text-ink">Timeline</h3>

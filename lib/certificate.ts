@@ -1,4 +1,6 @@
-import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from "pdf-lib";
+import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage, type PDFImage } from "pdf-lib";
+import { readFile } from "fs/promises";
+import path from "path";
 
 const MARIGOLD = rgb(0xc9 / 255, 0x74 / 255, 0x1b / 255);
 const INK = rgb(0x1a / 255, 0x1a / 255, 0x1a / 255);
@@ -23,6 +25,29 @@ function centerText(
 ) {
   const width = font.widthOfTextAtSize(text, size);
   page.drawText(text, { x: (page.getWidth() - width) / 2, y, size, font, color });
+}
+
+const ASSETS_DIR = path.join(process.cwd(), "public", "certificate-assets");
+
+async function embedLogo(doc: PDFDocument, filename: string): Promise<PDFImage> {
+  const bytes = await readFile(path.join(ASSETS_DIR, filename));
+  return doc.embedPng(bytes);
+}
+
+// Draws an image so it fits within targetHeight, preserving aspect ratio,
+// centered horizontally around centerX with its top edge at topY.
+function drawLogo(
+  page: PDFPage,
+  image: PDFImage,
+  centerX: number,
+  topY: number,
+  targetHeight: number
+) {
+  const scale = targetHeight / image.height;
+  const w = image.width * scale;
+  const h = targetHeight;
+  page.drawImage(image, { x: centerX - w / 2, y: topY - h, width: w, height: h });
+  return h;
 }
 
 // Simple greedy word-wrap since pdf-lib has no built-in text flow.
@@ -52,6 +77,12 @@ export async function generateCertificatePdf(input: CertificateInput): Promise<U
   const helvBold = await doc.embedFont(StandardFonts.HelveticaBold);
   const timesItalic = await doc.embedFont(StandardFonts.TimesRomanItalic);
 
+  const [i2iLogo, coepLogo, eatonLogo] = await Promise.all([
+    embedLogo(doc, "i2i-logo.png"),
+    embedLogo(doc, "coep-logo.png"),
+    embedLogo(doc, "eaton-logo.png"),
+  ]);
+
   page.drawRectangle({ x: 0, y: 0, width, height, color: CREAM });
 
   // Outer + inner decorative border
@@ -72,10 +103,13 @@ export async function generateCertificatePdf(input: CertificateInput): Promise<U
     borderWidth: 0.75,
   });
 
-  let y = height - 90;
+  const logoTopY = height - 46;
+  drawLogo(page, coepLogo, 120, logoTopY, 62);
+  drawLogo(page, eatonLogo, width - 120, logoTopY, 34);
+  drawLogo(page, i2iLogo, width / 2, logoTopY, 78);
 
-  centerText(page, "IGNITED INNOVATORS OF INDIA", y, helvBold, 15, MARIGOLD);
-  y -= 20;
+  let y = logoTopY - 78 - 16;
+
   centerText(
     page,
     "Bhau Institute, COEP Technological University, Pune",
@@ -85,8 +119,8 @@ export async function generateCertificatePdf(input: CertificateInput): Promise<U
     MUTED
   );
 
-  y -= 44;
-  centerText(page, "CERTIFICATE OF PARTICIPATION", y, helvBold, 30, INK);
+  y -= 38;
+  centerText(page, "CERTIFICATE OF PARTICIPATION", y, helvBold, 28, INK);
 
   y -= 20;
   page.drawLine({
