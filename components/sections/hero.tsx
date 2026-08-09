@@ -5,7 +5,6 @@ import { ArrowUpRight, Sparkles } from 'lucide-react'
 import { AnimatedText } from '@/components/motion-primitives'
 import { MagneticButton } from '@/components/magnetic-button'
 import { GradientOrbs, Particles } from '@/components/background-fx'
-import { ReachMap } from '@/components/reach-map'
 import { Scene3DBackground } from '@/components/scene-3d'
 
 const easeOut = [0.16, 1, 0.3, 1] as const
@@ -99,11 +98,10 @@ export function Hero() {
           transition={{ duration: 1, delay: 0.4, ease: easeOut }}
           className="relative mx-auto aspect-square w-full max-w-lg"
         >
-          <div className="glass absolute inset-0 rounded-[2rem]" />
-          <div className="absolute inset-4 overflow-hidden rounded-[1.5rem]">
-            <ReachMap compact />
-          </div>
-          <div className="glass-strong absolute -bottom-4 left-6 flex items-center gap-3 rounded-2xl px-4 py-3">
+          {/* The 3D particle crystal (Scene3DBackground, mounted at section
+              level) renders into this half of the frame — this column is a
+              deliberate empty stage for it, not a card. */}
+          <div className="glass-strong absolute bottom-0 left-6 flex items-center gap-3 rounded-2xl px-4 py-3">
             <span className="relative flex size-2.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-70" />
               <span className="relative inline-flex size-2.5 rounded-full bg-primary" />
