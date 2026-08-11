@@ -589,3 +589,51 @@ discussion board, Phase 4 submissions, staff invites, and edit requests.
 Remaining lower-priority items: Phase Engine (open/close scheduling UI),
 Email Templates admin editor — both have their database tables ready, just
 no UI yet.
+
+## Phase Engine, Email Templates editor, Users & Access edit/deactivate
+
+The three items above are now built:
+- **Phase Engine** (`/portal/secretary/phase-engine`) — open/close each
+  phase and optionally schedule when it opens/closes. Admin control only
+  for now — nothing yet reads this to actually block a participant action
+  (e.g. registration doesn't check whether Phase 1 is open). Flag if you
+  want that wired in.
+- **Email Templates** (`/portal/secretary/email-templates`) — override the
+  subject/body of any automated email with `{{variable}}` placeholders.
+  This actually changes what sends: `dispatchNotification` now checks
+  `email_templates` for an override before falling back to the hardcoded
+  copy in `lib/notifications/templates.ts`.
+- **Users & Access** — Edit (role, head title) and Deactivate/Reactivate
+  per staff row, via `app/api/staff/update/route.ts`. Deactivating also
+  bans the Supabase Auth user (not just a flag), so it actually blocks
+  login. A Secretary can't deactivate their own account.
+
+## In-app notification bell (all 4 portals)
+
+A bell icon, top-right in every portal, with an unread-count badge and a
+dropdown feed — LinkedIn/Instagram-style, not another email. Run
+`database/17_in_app_notifications.sql` (after `16_...sql`) — it adds an
+`in_app_notifications` table and hooks into the *same* trigger functions
+that already enqueue email/WhatsApp (phase 2/3 shortlist, funding status,
+mentor/ambassador assignment), so there's one source of truth for "what
+happened." It does not touch or remove the existing email/WhatsApp side of
+those triggers.
+
+Currently polls every 30s (`components/notification-bell.tsx`) rather than
+using Supabase Realtime — this codebase has no existing realtime usage
+anywhere else, so polling keeps this consistent with how everything else
+here works. Can switch to a live websocket subscription later if the
+30s lag ever matters.
+
+**Why not email for this:** the existing email/WhatsApp queue
+(`notification_queue`) has a real gap — nothing currently drains it on a
+schedule in production. The GitHub Actions cron meant to do this
+(`keep-alive.yml`) was created early on but never actually got committed
+(excluded via `.gitignore`, blocked by a GitHub App token permission
+issue at the time) — see git history. `vercel.json` has a cron hitting
+`/api/notifications/process` every 5 minutes, but that only fires if
+deployed on Vercel, and Vercel's free Hobby plan restricts cron frequency
+to about once/day (Pro plan removes that limit) — worth confirming
+against whichever plan this actually deploys on. The in-app bell above
+doesn't depend on any of that, which is why it's the primary way
+participants now find out about phase transitions.
