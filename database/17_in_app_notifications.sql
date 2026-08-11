@@ -15,7 +15,7 @@
 -- functions at all, it only adds an additional insert alongside them.
 -- ============================================================================
 
-create table in_app_notifications (
+create table if not exists in_app_notifications (
   id uuid primary key default gen_random_uuid(),
   recipient_auth_id uuid not null references auth.users(id) on delete cascade,
   type text not null,
@@ -26,7 +26,7 @@ create table in_app_notifications (
   created_at timestamptz not null default now()
 );
 
-create index idx_in_app_notifications_recipient
+create index if not exists idx_in_app_notifications_recipient
   on in_app_notifications(recipient_auth_id, created_at desc);
 
 alter table in_app_notifications enable row level security;
@@ -35,9 +35,13 @@ alter table in_app_notifications enable row level security;
 -- deliberately no insert/delete policy for regular users — rows are only
 -- ever created by the security definer trigger functions below (or the
 -- service role), never directly by a client.
+-- drop-then-create makes this block safe to re-run (this whole file is
+-- meant to be idempotent, since it partially failed once already).
+drop policy if exists in_app_notifications_read_own on in_app_notifications;
 create policy in_app_notifications_read_own on in_app_notifications
   for select using (recipient_auth_id = auth.uid());
 
+drop policy if exists in_app_notifications_update_own on in_app_notifications;
 create policy in_app_notifications_update_own on in_app_notifications
   for update using (recipient_auth_id = auth.uid());
 
