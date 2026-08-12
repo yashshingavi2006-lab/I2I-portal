@@ -61,6 +61,7 @@ export function PortfolioWorkspace({
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [messageInput, setMessageInput] = useState("");
+  const [messageError, setMessageError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [gradingMeeting, setGradingMeeting] = useState<Meeting | null>(null);
   const [showRaiseForm, setShowRaiseForm] = useState(false);
@@ -98,10 +99,10 @@ export function PortfolioWorkspace({
 
   async function sendMessage() {
     if (!messageInput.trim() || !selectedId) return;
+    setMessageError(null);
     const supabase = createClient();
     const text = messageInput.trim();
-    setMessageInput("");
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("discussion_messages")
       .insert({
         team_id: selectedId,
@@ -112,7 +113,16 @@ export function PortfolioWorkspace({
       })
       .select("id,sender_name,sender_role,message,created_at")
       .single();
-    if (data) setMessages((prev) => [...prev, data]);
+    if (error || !data) {
+      // Leave the typed text in the input so it isn't silently lost —
+      // clearing it before confirming the insert succeeded meant a failed
+      // send just discarded whatever the person wrote with no feedback.
+      console.error("Failed to send discussion message:", error);
+      setMessageError("Couldn't send — try again.");
+      return;
+    }
+    setMessageInput("");
+    setMessages((prev) => [...prev, data]);
   }
 
   const awaitingGrading = meetings.filter((m) => m.status === "awaiting_grading");
@@ -132,10 +142,16 @@ export function PortfolioWorkspace({
   async function toggleMilestone(id: string, done: boolean) {
     const supabase = createClient();
     setMilestones((prev) => prev.map((m) => (m.id === id ? { ...m, is_done: done } : m)));
-    await supabase
+    const { error } = await supabase
       .from("milestones")
       .update({ is_done: done, completed_at: done ? new Date().toISOString() : null })
       .eq("id", id);
+    if (error) {
+      // The optimistic flip above didn't actually persist — revert it
+      // rather than leaving the checkbox showing a state the DB doesn't have.
+      console.error("Failed to update milestone:", error);
+      setMilestones((prev) => prev.map((m) => (m.id === id ? { ...m, is_done: !done } : m)));
+    }
   }
 
   if (teams.length === 0) {
@@ -384,6 +400,7 @@ export function PortfolioWorkspace({
             Send
           </button>
         </div>
+        {messageError && <p className="mt-1.5 text-xs font-medium text-red-500">{messageError}</p>}
       </div>
 
       {gradingMeeting && (

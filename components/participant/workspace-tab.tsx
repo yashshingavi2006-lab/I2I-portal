@@ -706,6 +706,9 @@ function Phase4Panel({ teamId }: { teamId: string }) {
   const [resultAward, setResultAward] = useState("not_scored");
   const [submittedAt, setSubmittedAt] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const requiredComplete = !!reportUrl.trim() && !!pptUrl.trim() && !!videoUrl.trim();
 
   const load = useCallback(async () => {
     const supabase = createClient();
@@ -729,9 +732,14 @@ function Phase4Panel({ teamId }: { teamId: string }) {
   }, [load]);
 
   async function submit() {
+    setError(null);
+    if (!requiredComplete) {
+      setError("All three links — report, presentation, and demo video — are required before submitting.");
+      return;
+    }
     setSaving(true);
     const supabase = createClient();
-    await supabase.from("phase4_submissions").upsert(
+    const { error: saveErr } = await supabase.from("phase4_submissions").upsert(
       {
         team_id: teamId,
         report_doc_url: reportUrl,
@@ -742,6 +750,11 @@ function Phase4Panel({ teamId }: { teamId: string }) {
       { onConflict: "team_id" }
     );
     setSaving(false);
+    if (saveErr) {
+      console.error("Failed to submit Phase 4 final submission:", saveErr);
+      setError("Couldn't submit right now. Check your connection and try again.");
+      return;
+    }
     load();
   }
 
@@ -791,13 +804,20 @@ function Phase4Panel({ teamId }: { teamId: string }) {
         </div>
       </div>
 
+      {error && <p className="mt-3 text-xs font-medium text-red-500">{error}</p>}
+
       <button
         onClick={submit}
-        disabled={saving}
-        className="mt-4 rounded-lg bg-marigold px-4 py-2 text-sm font-semibold text-ink disabled:opacity-60"
+        disabled={saving || !requiredComplete}
+        className="mt-4 rounded-lg bg-marigold px-4 py-2 text-sm font-semibold text-ink disabled:cursor-not-allowed disabled:opacity-50"
       >
         {saving ? "Saving..." : submittedAt ? "Update submission" : "Submit for evaluation"}
       </button>
+      {!requiredComplete && (
+        <p className="mt-2 text-xs text-muted">
+          Fill in the report, presentation, and demo video links above before submitting.
+        </p>
+      )}
 
       {submittedAt && (
         <div className="mt-4 flex items-center justify-between rounded-lg border border-line bg-paper px-4 py-3">
