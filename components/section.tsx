@@ -1,6 +1,11 @@
+'use client'
+
 import { type ReactNode } from 'react'
+import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { Reveal } from '@/components/motion-primitives'
+
+const easeOut = [0.16, 1, 0.3, 1] as const
 
 export function Section({
   id,
@@ -51,11 +56,18 @@ export function SectionHeader({
       <Reveal>
         <Eyebrow>{eyebrow}</Eyebrow>
       </Reveal>
-      <Reveal delay={0.05}>
-        <h2 className="max-w-3xl text-balance font-display text-3xl font-semibold leading-[1.1] tracking-tight sm:text-4xl md:text-5xl">
-          {title}
-        </h2>
-      </Reveal>
+      {/* Curtain-wipe reveal (clip-path) instead of a plain fade — the one
+          shared beat every section title gets, distinct from the card-grid
+          lift below it so the page doesn't read as one repeated motion. */}
+      <motion.h2
+        initial={{ opacity: 0, clipPath: 'inset(0 100% 0 0)' }}
+        whileInView={{ opacity: 1, clipPath: 'inset(0 0% 0 0)' }}
+        viewport={{ once: true, margin: '-80px' }}
+        transition={{ duration: 0.8, ease: easeOut, delay: 0.05 }}
+        className="max-w-3xl text-balance font-display text-3xl font-semibold leading-[1.1] tracking-tight sm:text-4xl md:text-5xl"
+      >
+        {title}
+      </motion.h2>
       {description && (
         <Reveal delay={0.1}>
           <p

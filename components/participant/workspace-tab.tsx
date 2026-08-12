@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { FileUploadField } from "./file-upload-field";
 import { OtherDocumentsField, type OtherDocument } from "./other-documents-field";
 import { WeeklyTargets } from "@/components/weekly-targets";
+import { RejectedPanel } from "./rejected-panel";
 
 type Phase2Data = {
   id: string | null;
@@ -79,6 +80,8 @@ export function WorkspaceTab({ teamId, status }: { teamId: string; status: strin
           <Phase3Panel teamId={teamId} status={status} />
           {inPhase3Plus && <Phase4Panel teamId={teamId} />}
         </div>
+      ) : status === "rejected" ? (
+        <RejectedPanel teamId={teamId} />
       ) : (
         <div className="rounded-2xl border border-dashed border-line bg-surface p-8 text-center">
           <p className="font-display text-lg font-semibold text-ink">

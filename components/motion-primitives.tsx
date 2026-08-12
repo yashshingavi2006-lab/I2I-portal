@@ -6,10 +6,11 @@ import { motion, type Variants } from 'framer-motion'
 const easeOut = [0.16, 1, 0.3, 1] as const
 
 export const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 28 },
+  hidden: { opacity: 0, y: 28, scale: 0.96 },
   visible: {
     opacity: 1,
     y: 0,
+    scale: 1,
     transition: { duration: 0.7, ease: easeOut },
   },
 }
@@ -35,8 +36,8 @@ export function Reveal({
   return (
     <motion.div
       className={className}
-      initial={{ opacity: 0, y }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y, scale: 0.97 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: '-80px' }}
       transition={{ duration: 0.7, ease: easeOut, delay }}
     >

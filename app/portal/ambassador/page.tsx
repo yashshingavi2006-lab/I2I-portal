@@ -96,7 +96,7 @@ export default async function AmbassadorPortal() {
   });
 
   return (
-    <PageShell particles={false} theme="v0" className="flex min-h-screen flex-col">
+    <PageShell particles={false} theme="v0" scene3d className="flex min-h-screen flex-col">
       <PortalHeader
         portalLabel="Ambassador"
         name={staff.full_name}

@@ -45,7 +45,7 @@ export default async function MentorPortal() {
   });
 
   return (
-    <PageShell particles={false} theme="v0" className="flex min-h-screen flex-col">
+    <PageShell particles={false} theme="v0" scene3d className="flex min-h-screen flex-col">
       <PortalHeader portalLabel="Mentor" name={staff.full_name} roleLabel="Mentor" />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-8">
         <PortfolioWorkspace

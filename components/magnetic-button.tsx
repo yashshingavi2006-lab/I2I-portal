@@ -1,7 +1,7 @@
 'use client'
 
-import { type ReactNode, useRef, useState } from 'react'
-import { motion } from 'framer-motion'
+import { type ReactNode, useRef } from 'react'
+import { motion, useMotionValue, useSpring } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
 interface MagneticButtonProps {
@@ -22,19 +22,25 @@ export function MagneticButton({
   ariaLabel,
 }: MagneticButtonProps) {
   const ref = useRef<HTMLDivElement>(null)
-  const [pos, setPos] = useState({ x: 0, y: 0 })
+  // Continuous mouse-tracking drives these motion values directly (no React
+  // state/re-render per mousemove) — useSpring subscribes and animates off
+  // React's render cycle, the perf-safe way to do magnetic hover.
+  const rawX = useMotionValue(0)
+  const rawY = useMotionValue(0)
+  const x = useSpring(rawX, { stiffness: 200, damping: 15, mass: 0.4 })
+  const y = useSpring(rawY, { stiffness: 200, damping: 15, mass: 0.4 })
 
   function handleMove(e: React.MouseEvent) {
     const el = ref.current
     if (!el) return
     const rect = el.getBoundingClientRect()
-    const x = e.clientX - (rect.left + rect.width / 2)
-    const y = e.clientY - (rect.top + rect.height / 2)
-    setPos({ x: x * 0.25, y: y * 0.25 })
+    rawX.set((e.clientX - (rect.left + rect.width / 2)) * 0.25)
+    rawY.set((e.clientY - (rect.top + rect.height / 2)) * 0.25)
   }
 
   function reset() {
-    setPos({ x: 0, y: 0 })
+    rawX.set(0)
+    rawY.set(0)
   }
 
   const base =
@@ -50,8 +56,7 @@ export function MagneticButton({
       ref={ref}
       onMouseMove={handleMove}
       onMouseLeave={reset}
-      animate={{ x: pos.x, y: pos.y }}
-      transition={{ type: 'spring', stiffness: 200, damping: 15, mass: 0.4 }}
+      style={{ x, y }}
       className="inline-block"
     >
       <span className={cn(base, styles, className)}>{children}</span>

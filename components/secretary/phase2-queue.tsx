@@ -42,10 +42,13 @@ export function Phase2Queue({ initialRows }: { initialRows: Row[] }) {
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<{
     accepted: number;
+    acceptedWithAmount?: number;
     rejected: number;
     alreadyDecided: number;
     notFound: string[];
     unrecognizedDecisions: number;
+    missingAmounts?: string[];
+    invalidAmounts?: string[];
     message: string;
   } | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
@@ -200,6 +203,9 @@ export function Phase2Queue({ initialRows }: { initialRows: Row[] }) {
           <p className="font-medium text-ink">{importResult.message}</p>
           <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-light">
             <span>✓ Accepted → Phase 3: <strong>{importResult.accepted}</strong></span>
+            {!!importResult.acceptedWithAmount && (
+              <span>💰 With a funding amount applied: <strong>{importResult.acceptedWithAmount}</strong></span>
+            )}
             <span>✕ Rejected: <strong>{importResult.rejected}</strong></span>
             {importResult.alreadyDecided > 0 && (
               <span>⏭ Skipped (already decided previously): <strong>{importResult.alreadyDecided}</strong></span>
@@ -211,6 +217,18 @@ export function Phase2Queue({ initialRows }: { initialRows: Row[] }) {
           {importResult.notFound.length > 0 && (
             <p className="mt-1.5 text-xs text-red-500">
               Project codes not found: {importResult.notFound.join(", ")}
+            </p>
+          )}
+          {!!importResult.invalidAmounts?.length && (
+            <p className="mt-1.5 text-xs text-red-500">
+              Amount couldn&apos;t be read (not a valid non-negative number) — accepted without a funding
+              amount, set it individually via Review: {importResult.invalidAmounts.join(", ")}
+            </p>
+          )}
+          {!!importResult.missingAmounts?.length && (
+            <p className="mt-1.5 text-xs text-ink-light">
+              Accepted without a funding amount (left blank on the spreadsheet) — set these individually
+              via Review: {importResult.missingAmounts.join(", ")}
             </p>
           )}
         </div>
