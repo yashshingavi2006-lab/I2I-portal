@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { Section, SectionHeader } from '@/components/section'
 import { LinkedInIcon } from '@/components/social-icons'
@@ -28,11 +29,14 @@ const mentors = [
   { name: 'Vikas Khule', role: 'Engineering Manager', org: 'Eaton India', initials: 'VK' },
 ]
 
-// I2I has one sponsor: Eaton. Both names below are the real, distinct
-// designations used across i2i's official materials. Repeated several times
-// so the marquee track is dense enough to scroll smoothly rather than
-// leaving empty space.
-const partners = Array(5).fill(['Eaton', 'Eaton India Foundation']).flat()
+// I2I has one sponsor: Eaton. The marquee alternates the Eaton wordmark
+// (logo, not text — same pill size as the text entry) with "Eaton India
+// Foundation", the real, distinct designation used across i2i's official
+// materials. Repeated several times so the track is dense enough to scroll
+// smoothly rather than leaving empty space.
+const partners: ({ type: 'logo' } | { type: 'text'; label: string })[] = Array(5)
+  .fill([{ type: 'logo' as const }, { type: 'text' as const, label: 'Eaton India Foundation' }])
+  .flat()
 
 function PersonCard({ m }: { m: { name: string; role: string; org: string; initials: string } }) {
   return (
@@ -103,14 +107,23 @@ export function Mentors() {
         </p>
         <div className="relative mt-6 overflow-hidden [mask-image:linear-gradient(to_right,transparent,#000_12%,#000_88%,transparent)]">
           <div className="flex w-max animate-marquee mx-auto gap-4">
-            {[...partners, ...partners].map((p, i) => (
-              <span
-                key={i}
-                className="glass whitespace-nowrap rounded-full px-6 py-3 font-display text-sm font-medium text-muted-foreground"
-              >
-                {p}
-              </span>
-            ))}
+            {[...partners, ...partners].map((p, i) =>
+              p.type === 'logo' ? (
+                <span
+                  key={i}
+                  className="glass flex items-center whitespace-nowrap rounded-full px-6 py-3"
+                >
+                  <Image src="/eaton-logo.png" alt="Eaton" width={954} height={245} className="h-5 w-auto" />
+                </span>
+              ) : (
+                <span
+                  key={i}
+                  className="glass whitespace-nowrap rounded-full px-6 py-3 font-display text-sm font-medium text-muted-foreground"
+                >
+                  {p.label}
+                </span>
+              )
+            )}
           </div>
         </div>
       </Reveal>
