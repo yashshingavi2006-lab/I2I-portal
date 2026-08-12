@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageShell } from "@/components/page-shell";
 import { SecretarySidebar } from "@/components/secretary-sidebar";
+import { NotificationBell } from "@/components/notification-bell";
 
 export default async function SecretaryLayout({
   children,
@@ -26,7 +27,12 @@ export default async function SecretaryLayout({
   return (
     <PageShell particles={false} theme="v0" className="flex min-h-screen">
       <SecretarySidebar name={staff.full_name} email={staff.email} />
-      <main className="min-w-0 flex-1 px-6 py-8 sm:px-10">{children}</main>
+      <main className="min-w-0 flex-1 px-6 py-8 sm:px-10">
+        <div className="mb-4 flex justify-end">
+          <NotificationBell currentUserId={user.id} />
+        </div>
+        {children}
+      </main>
     </PageShell>
   );
 }

@@ -101,6 +101,7 @@ export default async function AmbassadorPortal() {
         portalLabel="Ambassador"
         name={staff.full_name}
         roleLabel={staff.head_title || staff.role.replace("_", " ")}
+        currentUserId={user.id}
       />
       <main className="mx-auto w-full max-w-6xl flex-1 space-y-4 px-4 py-10 sm:px-8">
         <Phase2ReviewerPanel initialRows={reviewRows} />
