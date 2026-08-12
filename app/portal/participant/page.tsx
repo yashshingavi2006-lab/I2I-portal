@@ -38,6 +38,7 @@ export default async function ParticipantPortal() {
         portalLabel="Participant"
         name={team.leader_name}
         roleLabel="Team Leader"
+        currentUserId={user.id}
       />
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-10 sm:px-8">
         <ParticipantTabs

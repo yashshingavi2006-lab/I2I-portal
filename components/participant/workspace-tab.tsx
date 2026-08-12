@@ -961,9 +961,10 @@ function TimelineRow({
       <input
         value={value}
         disabled={locked}
+        placeholder={locked ? "Timeline is locked" : "What did you work on today?"}
         onChange={(e) => setValue(e.target.value)}
         onBlur={() => onSave(value)}
-        className="flex-1 bg-transparent text-sm text-ink outline-none disabled:text-muted"
+        className="flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-muted/60 disabled:cursor-not-allowed disabled:text-muted"
       />
     </div>
   );
