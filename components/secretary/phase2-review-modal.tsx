@@ -87,6 +87,7 @@ export function Phase2ReviewModal({
   }, [applicationId]);
 
   async function saveFunding() {
+    if (!Number.isFinite(amount) || amount < 0) return;
     setSaving(true);
     const supabase = createClient();
     const { error } = await supabase
@@ -194,18 +195,22 @@ export function Phase2ReviewModal({
             </select>
             <input
               type="number"
+              min={0}
               value={amount}
               onChange={(e) => setAmount(Number(e.target.value))}
               className="w-28 rounded-lg border border-line bg-paper px-2.5 py-2 text-sm text-ink"
             />
             <button
               onClick={saveFunding}
-              disabled={saving}
+              disabled={saving || !Number.isFinite(amount) || amount < 0}
               className="rounded-lg bg-marigold px-4 py-2 text-sm font-semibold text-ink disabled:opacity-60"
             >
               {saving ? "Saving..." : "Save"}
             </button>
           </div>
+          {amount < 0 && (
+            <p className="mt-1.5 text-xs text-red-500">Amount can&apos;t be negative.</p>
+          )}
         </div>
       </motion.div>
     </motion.div>

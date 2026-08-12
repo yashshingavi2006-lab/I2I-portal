@@ -62,8 +62,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // ---- Collect { projectCode -> decision } across every sector sheet ----
+    // ---- Collect { projectCode -> decision } and { projectCode -> amount } across every sector sheet ----
     const decisionByCode = new Map<string, "accept" | "reject">();
+    const amountByCode = new Map<string, number>();
+    const invalidAmountCodes: string[] = [];
     let unrecognizedCount = 0;
     let sheetsRead = 0;
 
@@ -72,6 +74,7 @@ export async function POST(request: Request) {
       const headerRow = sheet.getRow(1);
       const codeCol = findColumn(headerRow, "Project Code");
       const decisionCol = findColumn(headerRow, "Phase 3 Decision", "Decision");
+      const amountCol = findColumn(headerRow, "Amount Approved (₹)", "Amount Approved");
       if (!codeCol || !decisionCol) continue; // not one of our exported sheets — skip quietly rather than error the whole import
       sheetsRead++;
 
@@ -89,6 +92,20 @@ export async function POST(request: Request) {
           return;
         }
         decisionByCode.set(code, decision);
+
+        // Only accepted rows carry a meaningful funding amount — a rejected
+        // team's amount cell (if any) is ignored.
+        if (decision === "accept" && amountCol) {
+          const amtRaw = row.getCell(amountCol).value;
+          if (amtRaw != null && String(amtRaw).trim() !== "") {
+            const num = Number(amtRaw);
+            if (Number.isFinite(num) && num >= 0) {
+              amountByCode.set(code, num);
+            } else {
+              invalidAmountCodes.push(code);
+            }
+          }
+        }
       });
     }
 
@@ -134,8 +151,21 @@ export async function POST(request: Request) {
     const eligible = (matchedTeams ?? []).filter((t) => t.status === "shortlisted_phase2");
     const alreadyDecided = (matchedTeams ?? []).length - eligible.length;
 
-    const acceptIds = eligible.filter((t) => decisionByCode.get(t.project_code!) === "accept").map((t) => t.id);
+    const acceptedTeams = eligible.filter((t) => decisionByCode.get(t.project_code!) === "accept");
+    const acceptIds = acceptedTeams.map((t) => t.id);
     const rejectIds = eligible.filter((t) => decisionByCode.get(t.project_code!) === "reject").map((t) => t.id);
+
+    // Accepted teams whose spreadsheet row had a valid amount vs. those that
+    // didn't (blank cell, or a value that failed the number/non-negative
+    // check above) — the latter still get accepted into Phase 3, just with
+    // amount_approved left untouched, same as before this fix existed.
+    const acceptedWithAmount = acceptedTeams.filter((t) => amountByCode.has(t.project_code!));
+    const acceptedWithoutAmount = acceptedTeams.filter((t) => !amountByCode.has(t.project_code!));
+    // Blank cell, as distinct from a cell that had text but failed validation
+    // (that case is reported separately via invalidAmountCodes).
+    const missingAmountCodes = acceptedWithoutAmount
+      .map((t) => t.project_code!)
+      .filter((code) => !invalidAmountCodes.includes(code));
 
     // ---- Apply, teams first then phase2_applications (both are needed —
     // teams.status is what the participant portal's gates tracker reads,
@@ -144,11 +174,28 @@ export async function POST(request: Request) {
     if (acceptIds.length > 0) {
       const { error: teamErr } = await admin.from("teams").update({ status: "shortlisted_phase3" }).in("id", acceptIds);
       if (teamErr) throw teamErr;
-      const { error: appErr } = await admin
-        .from("phase2_applications")
-        .update({ funding_status: "approved" })
-        .in("team_id", acceptIds);
-      if (appErr) throw appErr;
+
+      if (acceptedWithoutAmount.length > 0) {
+        const { error: appErr } = await admin
+          .from("phase2_applications")
+          .update({ funding_status: "approved" })
+          .in("team_id", acceptedWithoutAmount.map((t) => t.id));
+        if (appErr) throw appErr;
+      }
+      // Each accepted-with-amount team gets a different number, so these
+      // can't be one batched update — apply them in parallel instead.
+      if (acceptedWithAmount.length > 0) {
+        const results = await Promise.all(
+          acceptedWithAmount.map((t) =>
+            admin
+              .from("phase2_applications")
+              .update({ funding_status: "approved", amount_approved: amountByCode.get(t.project_code!) })
+              .eq("team_id", t.id)
+          )
+        );
+        const failed = results.find((r) => r.error);
+        if (failed?.error) throw failed.error;
+      }
     }
     if (rejectIds.length > 0) {
       const { error: teamErr } = await admin.from("teams").update({ status: "rejected" }).in("id", rejectIds);
@@ -167,19 +214,24 @@ export async function POST(request: Request) {
       target_type: "phase2_applications",
       details: {
         accepted: acceptIds.length,
+        accepted_with_amount: acceptedWithAmount.length,
         rejected: rejectIds.length,
         already_decided_skipped: alreadyDecided,
         not_found: notFound,
         unrecognized_decisions: unrecognizedCount,
+        invalid_amounts: invalidAmountCodes,
       },
     });
 
     return NextResponse.json({
       accepted: acceptIds.length,
+      acceptedWithAmount: acceptedWithAmount.length,
       rejected: rejectIds.length,
       alreadyDecided,
       notFound,
       unrecognizedDecisions: unrecognizedCount,
+      missingAmounts: missingAmountCodes,
+      invalidAmounts: invalidAmountCodes,
       message: `Applied ${acceptIds.length + rejectIds.length} decisions. Notifications are queued and will reach participants shortly.`,
     });
   } catch (err) {
