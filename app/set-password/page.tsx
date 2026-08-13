@@ -44,13 +44,13 @@ export default function SetPasswordPage() {
       setError(updateErr.message);
       return;
     }
-    router.push("/my-registration");
+    router.push("/dashboard");
   }
 
   return (
     <AuthCard
       title="Set your password"
-      subtitle="This will be your login for the I2I portal as team leader."
+      subtitle="This will be your login for the I2I portal."
     >
       <div className="space-y-4">
         <Field label="New password" required>
