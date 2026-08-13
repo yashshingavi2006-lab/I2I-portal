@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { AuthCard } from "@/components/auth-card";
@@ -12,6 +12,19 @@ export default function SetPasswordPage() {
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // The invite link puts the session tokens in the URL hash fragment
+    // (#access_token=...&refresh_token=...) rather than a query string —
+    // @supabase/ssr's browser client doesn't auto-consume that on its own,
+    // so without this, updateUser() below fails with "Auth session missing!"
+    const params = new URLSearchParams(window.location.hash.slice(1));
+    const access_token = params.get("access_token");
+    const refresh_token = params.get("refresh_token");
+    if (access_token && refresh_token) {
+      createClient().auth.setSession({ access_token, refresh_token });
+    }
+  }, []);
 
   async function submit() {
     setError(null);
@@ -25,8 +38,6 @@ export default function SetPasswordPage() {
     }
     setLoading(true);
     const supabase = createClient();
-    // The invite link's URL fragment already establishes a recovery session
-    // (Supabase handles this client-side automatically on page load).
     const { error: updateErr } = await supabase.auth.updateUser({ password });
     setLoading(false);
     if (updateErr) {

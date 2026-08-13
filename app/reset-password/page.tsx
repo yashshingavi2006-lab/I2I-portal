@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { AuthCard } from "@/components/auth-card";
@@ -12,6 +12,19 @@ export default function ResetPasswordPage() {
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // Same fix as set-password: the recovery link's session tokens arrive
+    // in the URL hash fragment, which @supabase/ssr's browser client
+    // doesn't auto-consume — without this, updateUser() fails with
+    // "Auth session missing!"
+    const params = new URLSearchParams(window.location.hash.slice(1));
+    const access_token = params.get("access_token");
+    const refresh_token = params.get("refresh_token");
+    if (access_token && refresh_token) {
+      createClient().auth.setSession({ access_token, refresh_token });
+    }
+  }, []);
 
   async function submit() {
     setError(null);
