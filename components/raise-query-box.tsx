@@ -11,6 +11,14 @@ export function RaiseQueryBox() {
   const [error, setError] = useState<string | null>(null);
 
   async function submit() {
+    if (!name.trim()) {
+      setError("Your name is required.");
+      return;
+    }
+    if (!email.trim() || !/^\S+@\S+\.\S+$/.test(email)) {
+      setError("A valid email is required.");
+      return;
+    }
     if (!message.trim()) {
       setError("Write your query before submitting.");
       return;
@@ -62,14 +70,16 @@ export function RaiseQueryBox() {
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Your name (optional)"
+          placeholder="Your name"
+          required
           className="rounded-lg border border-line bg-paper px-3 py-2 text-sm text-ink outline-none focus:border-marigold"
         />
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="Your email (optional, so we can reply)"
+          placeholder="Your email"
+          required
           className="rounded-lg border border-line bg-paper px-3 py-2 text-sm text-ink outline-none focus:border-marigold"
         />
       </div>

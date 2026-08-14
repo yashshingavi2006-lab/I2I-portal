@@ -10,6 +10,12 @@ export async function POST(req: NextRequest) {
     const name = String(body.name ?? "").trim();
     const email = String(body.email ?? "").trim();
 
+    if (!name) {
+      return NextResponse.json({ error: "Name is required." }, { status: 400 });
+    }
+    if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+      return NextResponse.json({ error: "A valid email is required." }, { status: 400 });
+    }
     if (!message) {
       return NextResponse.json({ error: "Write your query before submitting." }, { status: 400 });
     }
