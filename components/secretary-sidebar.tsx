@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { HelpWidget } from "./help-widget";
 
 const COMPETITION_FLOW = [
   { href: "/portal/secretary/phase-1", label: "Phase 1 – Registration", n: 1 },
@@ -29,6 +30,7 @@ export function SecretarySidebar({ name, email }: { name: string; email: string 
   }
 
   return (
+    <>
     <aside className="hidden w-64 shrink-0 flex-col border-r border-line bg-surface px-4 py-6 sm:flex">
       <div className="mb-6 flex items-center gap-2 px-2">
         <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-marigold font-display text-sm font-bold text-ink">
@@ -100,5 +102,7 @@ export function SecretarySidebar({ name, email }: { name: string; email: string 
         </button>
       </div>
     </aside>
+    <HelpWidget />
+    </>
   );
 }
