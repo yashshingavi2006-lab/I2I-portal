@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Eye, CheckCircle2 } from "lucide-react";
 import { Field, TextInput, TextArea, Select } from "./form-fields";
 import { StepIndicator } from "./step-indicator";
+import { RaiseQueryBox } from "./raise-query-box";
 import {
   SECTORS,
   COLLEGE_TYPES,
@@ -204,6 +205,7 @@ export function RegistrationWizard() {
 
   if (result) {
     return (
+      <>
       <motion.div
         initial={{ opacity: 0, y: 20, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -255,6 +257,8 @@ export function RegistrationWizard() {
           </a>
         </div>
       </motion.div>
+      <RaiseQueryBox />
+      </>
     );
   }
 
@@ -792,6 +796,8 @@ export function RegistrationWizard() {
           </div>
         )}
       </AnimatePresence>
+
+      <RaiseQueryBox />
     </div>
   );
 }
