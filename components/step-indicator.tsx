@@ -1,6 +1,6 @@
 const STEPS = [
   { n: 1, label: "Team" },
-  { n: 2, label: "Location" },
+  { n: 2, label: "Institute" },
   { n: 3, label: "Project & Sector" },
 ];
 

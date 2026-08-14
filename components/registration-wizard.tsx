@@ -446,7 +446,7 @@ export function RegistrationWizard() {
             {step === 2 && (
               <div className="space-y-5">
                 <h2 className="font-display text-lg font-semibold text-ink">
-                  Location &amp; institution
+                  Institution &amp; location
                 </h2>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Field label="State" required>
@@ -744,7 +744,7 @@ export function RegistrationWizard() {
 
                 <div className="space-y-3 rounded-xl border border-line bg-paper p-4">
                   <p className="text-xs font-semibold uppercase tracking-wider text-marigold">
-                    Location &amp; Institution
+                    Institute &amp; Location
                   </p>
                   <PreviewRow
                     label="College"
