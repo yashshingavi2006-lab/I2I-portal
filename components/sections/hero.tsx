@@ -79,12 +79,12 @@ export function Hero() {
             transition={{ duration: 0.7, delay: 0.7, ease: easeOut }}
             className="flex flex-wrap items-center gap-3"
           >
-            <MagneticButton href="#portals">
-              Explore Portals
+            <MagneticButton href="/register">
+              Register Now
               <ArrowUpRight className="size-4" />
             </MagneticButton>
-            <MagneticButton href="#startups" variant="ghost">
-              View Startups
+            <MagneticButton href="#portals" variant="ghost">
+              Explore Portals
             </MagneticButton>
           </motion.div>
 

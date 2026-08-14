@@ -79,10 +79,10 @@ export function Navbar() {
 
         <div className="flex items-center gap-2">
           <a
-            href="/register"
+            href="/login?portal=participant"
             className="hidden rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-[var(--amber-soft)] sm:inline-flex"
           >
-            Register Now
+            Sign In
           </a>
           <button
             type="button"
@@ -116,11 +116,11 @@ export function Navbar() {
               </a>
             ))}
             <a
-              href="/register"
+              href="/login?portal=participant"
               onClick={() => setOpen(false)}
               className="mt-1 rounded-xl bg-primary px-4 py-3 text-center text-sm font-medium text-primary-foreground"
             >
-              Register Now
+              Sign In
             </a>
           </motion.div>
         )}
