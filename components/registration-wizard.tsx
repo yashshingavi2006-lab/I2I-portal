@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { X, Eye, CheckCircle2 } from "lucide-react";
 import { Field, TextInput, TextArea, Select } from "./form-fields";
 import { StepIndicator } from "./step-indicator";
 import {
@@ -19,20 +20,18 @@ function PreviewRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="grid gap-1 border-b border-line pb-3 last:border-0 last:pb-0 sm:grid-cols-[160px_1fr] sm:gap-3">
       <span className="text-xs font-medium uppercase tracking-wide text-muted">{label}</span>
-      <span className="text-ink">{value || "—"}</span>
+      <span className="text-ink font-normal">{value || "—"}</span>
     </div>
   );
 }
 
 type FormData = {
-  // Page 1
+  // Step 1: Team
   team_name: string;
   team_size: number;
   leader_name: string;
   leader_email: string;
   leader_phone: string;
-  leader_password: string;
-  leader_password_confirm: string;
   leader_whatsapp_optin: boolean;
   leader_gender: string;
   leader_dob: string;
@@ -40,23 +39,24 @@ type FormData = {
   emergency_contact_phone: string;
   heard_about_us: string;
   members: Member[];
-  // Page 2
+  // Step 2: Location
   state: string;
   city: string;
   college_name: string;
   college_type: string;
   faculty_contact_name: string;
   faculty_contact_phone: string;
-  // Page 3
+  // Step 3: Sector, Project & Password
   sector_prefix: string;
   sub_theme: string;
-  // Page 4
   project_name: string;
   problem_statement: string;
   proposed_solution: string;
   target_beneficiaries: string;
   innovation_notes: string;
   idea_stage: string;
+  leader_password: string;
+  leader_password_confirm: string;
   consent_given: boolean;
 };
 
@@ -66,8 +66,6 @@ const initialData: FormData = {
   leader_name: "",
   leader_email: "",
   leader_phone: "",
-  leader_password: "",
-  leader_password_confirm: "",
   leader_whatsapp_optin: true,
   leader_gender: "",
   leader_dob: "",
@@ -89,6 +87,8 @@ const initialData: FormData = {
   target_beneficiaries: "",
   innovation_notes: "",
   idea_stage: "",
+  leader_password: "",
+  leader_password_confirm: "",
   consent_given: false,
 };
 
@@ -97,6 +97,7 @@ export function RegistrationWizard() {
   const [data, setData] = useState<FormData>(initialData);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showReviewModal, setShowReviewModal] = useState(false);
   const [result, setResult] = useState<{ project_code: string; email_sent: boolean } | null>(null);
 
   function update<K extends keyof FormData>(key: K, value: FormData[K]) {
@@ -104,7 +105,7 @@ export function RegistrationWizard() {
   }
 
   function syncMembers(size: number) {
-    const extraCount = Math.max(0, size - 1); // members beyond the leader
+    const extraCount = Math.max(0, size - 1);
     setData((d) => {
       const members = [...d.members];
       while (members.length < extraCount)
@@ -135,23 +136,17 @@ export function RegistrationWizard() {
       if (!data.college_name.trim()) return "College name is required.";
     }
     if (s === 3) {
-      if (!data.sector_prefix) return "Please select a sector before continuing.";
-    }
-    if (s === 4) {
+      if (!data.sector_prefix) return "Please select a sector.";
       if (!data.project_name.trim()) return "Project name is required.";
       if (!data.problem_statement.trim()) return "Problem statement is required.";
       if (!data.proposed_solution.trim()) return "Proposed solution is required.";
       if (!data.target_beneficiaries.trim()) return "Target beneficiaries is required.";
-    }
-    if (s === 5) {
-      if (!data.consent_given)
-        return "Please accept the declaration to continue.";
-    }
-    if (s === 6) {
       if (!data.leader_password || data.leader_password.length < 8)
         return "Password must be at least 8 characters.";
       if (data.leader_password !== data.leader_password_confirm)
         return "Passwords don't match.";
+      if (!data.consent_given)
+        return "Please accept the declaration to complete registration.";
     }
     return null;
   }
@@ -163,18 +158,16 @@ export function RegistrationWizard() {
       return;
     }
     setError(null);
-    setStep((s) => Math.min(6, s + 1));
+    setStep((s) => Math.min(3, s + 1));
   }
+
   function back() {
     setError(null);
     setStep((s) => Math.max(1, s - 1));
   }
 
   async function submit() {
-    // Defensive: re-check every step even though the wizard shouldn't allow
-    // getting here with something missing — catches any edge case where
-    // state was set some other way (e.g. browser back/forward cache).
-    for (const s of [1, 2, 3, 4, 5, 6]) {
+    for (const s of [1, 2, 3]) {
       const err = stepError(s);
       if (err) {
         setStep(s);
@@ -195,10 +188,8 @@ export function RegistrationWizard() {
       try {
         json = await res.json();
       } catch {
-        // Response wasn't valid JSON at all (e.g. server crashed before
-        // responding, or a proxy/dev-server error page came back instead).
         throw new Error(
-          "Server didn't respond properly. This usually means the backend isn't set up yet — check with the site admin."
+          "Server didn't respond properly. Please try again or check with site admin."
         );
       }
 
@@ -238,8 +229,7 @@ export function RegistrationWizard() {
         <p className="mt-4 text-sm leading-relaxed text-ink-light">
           You&apos;re all set — log in any time at{" "}
           <span className="font-medium text-ink">/login</span> with{" "}
-          <span className="font-medium text-ink">{data.leader_email}</span> and the password you
-          just set.
+          <span className="font-medium text-ink">{data.leader_email}</span> and your password.
         </p>
 
         {result.email_sent ? (
@@ -283,388 +273,366 @@ export function RegistrationWizard() {
             exit={{ opacity: 0, x: -24 }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
           >
-        {step === 1 && (
-          <div className="space-y-5">
-            <h2 className="font-display text-lg font-semibold text-ink">
-              Team &amp; personal information
-            </h2>
-            <Field label="Team name" required>
-              <TextInput
-                value={data.team_name}
-                onChange={(e) => update("team_name", e.target.value)}
-                placeholder="e.g. Team Prakriti"
-              />
-            </Field>
-            <Field label="Team size" required hint="Between 1 and 3 members, including the team leader">
-              <Select
-                value={data.team_size}
-                onChange={(e) => syncMembers(Number(e.target.value))}
-              >
-                {TEAM_SIZE_OPTIONS.map((n) => (
-                  <option key={n} value={n}>
-                    {n} {n === 1 ? "member (solo)" : "members"}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-
-            <div className="border-t border-line pt-5">
-              <p className="mb-3 text-sm font-semibold text-ink">
-                Team leader — this account will log in to the portal
-              </p>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Full name" required>
+            {step === 1 && (
+              <div className="space-y-5">
+                <h2 className="font-display text-lg font-semibold text-ink">
+                  Team &amp; personal information
+                </h2>
+                <Field label="Team name" required>
                   <TextInput
-                    value={data.leader_name}
-                    onChange={(e) => update("leader_name", e.target.value)}
+                    value={data.team_name}
+                    onChange={(e) => update("team_name", e.target.value)}
+                    placeholder="e.g. Team Prakriti"
                   />
                 </Field>
-                <Field label="Email" required hint="Used for login and all notifications">
-                  <TextInput
-                    type="email"
-                    value={data.leader_email}
-                    onChange={(e) => update("leader_email", e.target.value)}
-                  />
-                </Field>
-                <Field label="Phone number" required>
-                  <TextInput
-                    type="tel"
-                    value={data.leader_phone}
-                    onChange={(e) => update("leader_phone", e.target.value)}
-                    placeholder="+91 XXXXX XXXXX"
-                  />
-                </Field>
-                <Field label="Gender">
+                <Field label="Team size" required hint="Between 1 and 3 members, including the team leader">
                   <Select
-                    value={data.leader_gender}
-                    onChange={(e) => update("leader_gender", e.target.value)}
+                    value={data.team_size}
+                    onChange={(e) => syncMembers(Number(e.target.value))}
                   >
-                    <option value="">Select</option>
-                    <option>Male</option>
-                    <option>Female</option>
-                    <option>Other</option>
-                    <option>Prefer not to say</option>
-                  </Select>
-                </Field>
-                <Field label="Date of birth">
-                  <TextInput
-                    type="date"
-                    value={data.leader_dob}
-                    onChange={(e) => update("leader_dob", e.target.value)}
-                  />
-                </Field>
-                <Field label="How did you hear about I2I?">
-                  <Select
-                    value={data.heard_about_us}
-                    onChange={(e) => update("heard_about_us", e.target.value)}
-                  >
-                    <option value="">Select</option>
-                    {HEARD_ABOUT_OPTIONS.map((o) => (
-                      <option key={o}>{o}</option>
+                    {TEAM_SIZE_OPTIONS.map((n) => (
+                      <option key={n} value={n}>
+                        {n} {n === 1 ? "member (solo)" : "members"}
+                      </option>
                     ))}
                   </Select>
                 </Field>
-              </div>
-              <label className="mt-3 flex items-center gap-2 text-sm text-muted">
-                <input
-                  type="checkbox"
-                  checked={data.leader_whatsapp_optin}
-                  onChange={(e) => update("leader_whatsapp_optin", e.target.checked)}
-                  className="h-4 w-4 rounded border-line accent-marigold"
-                />
-                Send updates to this number on WhatsApp
-              </label>
-            </div>
 
-            <div className="border-t border-line pt-5">
-              <p className="mb-3 text-sm font-semibold text-ink">Emergency contact</p>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Name">
-                  <TextInput
-                    value={data.emergency_contact_name}
-                    onChange={(e) => update("emergency_contact_name", e.target.value)}
-                  />
-                </Field>
-                <Field label="Phone">
-                  <TextInput
-                    type="tel"
-                    value={data.emergency_contact_phone}
-                    onChange={(e) => update("emergency_contact_phone", e.target.value)}
-                  />
-                </Field>
-              </div>
-            </div>
+                <div className="border-t border-line pt-5">
+                  <p className="mb-3 text-sm font-semibold text-ink">
+                    Team leader — this account will log in to the portal
+                  </p>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Field label="Full name" required>
+                      <TextInput
+                        value={data.leader_name}
+                        onChange={(e) => update("leader_name", e.target.value)}
+                      />
+                    </Field>
+                    <Field label="Email" required hint="Used for login and all notifications">
+                      <TextInput
+                        type="email"
+                        value={data.leader_email}
+                        onChange={(e) => update("leader_email", e.target.value)}
+                      />
+                    </Field>
+                    <Field label="Phone number" required>
+                      <TextInput
+                        type="tel"
+                        value={data.leader_phone}
+                        onChange={(e) => update("leader_phone", e.target.value)}
+                        placeholder="+91 XXXXX XXXXX"
+                      />
+                    </Field>
+                    <Field label="Gender">
+                      <Select
+                        value={data.leader_gender}
+                        onChange={(e) => update("leader_gender", e.target.value)}
+                      >
+                        <option value="">Select</option>
+                        <option>Male</option>
+                        <option>Female</option>
+                        <option>Other</option>
+                        <option>Prefer not to say</option>
+                      </Select>
+                    </Field>
+                    <Field label="Date of birth">
+                      <TextInput
+                        type="date"
+                        value={data.leader_dob}
+                        onChange={(e) => update("leader_dob", e.target.value)}
+                      />
+                    </Field>
+                    <Field label="How did you hear about I2I?">
+                      <Select
+                        value={data.heard_about_us}
+                        onChange={(e) => update("heard_about_us", e.target.value)}
+                      >
+                        <option value="">Select</option>
+                        {HEARD_ABOUT_OPTIONS.map((o) => (
+                          <option key={o}>{o}</option>
+                        ))}
+                      </Select>
+                    </Field>
+                  </div>
+                  <label className="mt-3 flex items-center gap-2 text-sm text-muted">
+                    <input
+                      type="checkbox"
+                      checked={data.leader_whatsapp_optin}
+                      onChange={(e) => update("leader_whatsapp_optin", e.target.checked)}
+                      className="h-4 w-4 rounded border-line accent-marigold"
+                    />
+                    Send updates to this number on WhatsApp
+                  </label>
+                </div>
 
-            {data.members.length > 0 && (
-              <div className="border-t border-line pt-5">
-                <p className="mb-3 text-sm font-semibold text-ink">
-                  Other team members
-                </p>
-                <div className="space-y-4">
-                  {data.members.map((m, i) => (
-                    <div key={i} className="rounded-lg border border-line p-4">
-                      <p className="mb-2 text-xs font-medium text-muted">
-                        Member {i + 2}
-                      </p>
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <TextInput
-                          placeholder="Full name *"
-                          value={m.full_name}
-                          onChange={(e) => {
-                            const members = [...data.members];
-                            members[i] = { ...m, full_name: e.target.value };
-                            update("members", members);
-                          }}
-                        />
-                        <TextInput
-                          placeholder="Email *"
-                          type="email"
-                          value={m.email}
-                          onChange={(e) => {
-                            const members = [...data.members];
-                            members[i] = { ...m, email: e.target.value };
-                            update("members", members);
-                          }}
-                        />
-                        <TextInput
-                          placeholder="Phone"
-                          value={m.phone}
-                          onChange={(e) => {
-                            const members = [...data.members];
-                            members[i] = { ...m, phone: e.target.value };
-                            update("members", members);
-                          }}
-                        />
-                        <TextInput
-                          placeholder="Year of study"
-                          value={m.year_of_study}
-                          onChange={(e) => {
-                            const members = [...data.members];
-                            members[i] = { ...m, year_of_study: e.target.value };
-                            update("members", members);
-                          }}
-                        />
-                      </div>
+                <div className="border-t border-line pt-5">
+                  <p className="mb-3 text-sm font-semibold text-ink">Emergency contact</p>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Field label="Name">
+                      <TextInput
+                        value={data.emergency_contact_name}
+                        onChange={(e) => update("emergency_contact_name", e.target.value)}
+                      />
+                    </Field>
+                    <Field label="Phone">
+                      <TextInput
+                        type="tel"
+                        value={data.emergency_contact_phone}
+                        onChange={(e) => update("emergency_contact_phone", e.target.value)}
+                      />
+                    </Field>
+                  </div>
+                </div>
+
+                {data.members.length > 0 && (
+                  <div className="border-t border-line pt-5">
+                    <p className="mb-3 text-sm font-semibold text-ink">
+                      Other team members
+                    </p>
+                    <div className="space-y-4">
+                      {data.members.map((m, i) => (
+                        <div key={i} className="rounded-lg border border-line p-4">
+                          <p className="mb-2 text-xs font-medium text-muted">
+                            Member {i + 2}
+                          </p>
+                          <div className="grid gap-3 sm:grid-cols-2">
+                            <TextInput
+                              placeholder="Full name *"
+                              value={m.full_name}
+                              onChange={(e) => {
+                                const members = [...data.members];
+                                members[i] = { ...m, full_name: e.target.value };
+                                update("members", members);
+                              }}
+                            />
+                            <TextInput
+                              placeholder="Email *"
+                              type="email"
+                              value={m.email}
+                              onChange={(e) => {
+                                const members = [...data.members];
+                                members[i] = { ...m, email: e.target.value };
+                                update("members", members);
+                              }}
+                            />
+                            <TextInput
+                              placeholder="Phone"
+                              value={m.phone}
+                              onChange={(e) => {
+                                const members = [...data.members];
+                                members[i] = { ...m, phone: e.target.value };
+                                update("members", members);
+                              }}
+                            />
+                            <TextInput
+                              placeholder="Year of study"
+                              value={m.year_of_study}
+                              onChange={(e) => {
+                                const members = [...data.members];
+                                members[i] = { ...m, year_of_study: e.target.value };
+                                update("members", members);
+                              }}
+                            />
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {step === 2 && (
+              <div className="space-y-5">
+                <h2 className="font-display text-lg font-semibold text-ink">
+                  Location &amp; institution
+                </h2>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field label="State" required>
+                    <Select value={data.state} onChange={(e) => update("state", e.target.value)}>
+                      {INDIAN_STATES.map((s) => (
+                        <option key={s}>{s}</option>
+                      ))}
+                    </Select>
+                  </Field>
+                  <Field label="City" required>
+                    <TextInput
+                      value={data.city}
+                      onChange={(e) => update("city", e.target.value)}
+                    />
+                  </Field>
+                </div>
+                <Field label="College name" required>
+                  <TextInput
+                    value={data.college_name}
+                    onChange={(e) => update("college_name", e.target.value)}
+                    placeholder="Start typing your college name"
+                  />
+                </Field>
+                <Field label="College type">
+                  <Select
+                    value={data.college_type}
+                    onChange={(e) => update("college_type", e.target.value)}
+                  >
+                    <option value="">Select</option>
+                    {COLLEGE_TYPES.map((t) => (
+                      <option key={t}>{t}</option>
+                    ))}
+                  </Select>
+                </Field>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field label="Faculty / point of contact name" hint="Optional">
+                    <TextInput
+                      value={data.faculty_contact_name}
+                      onChange={(e) => update("faculty_contact_name", e.target.value)}
+                    />
+                  </Field>
+                  <Field label="Faculty contact phone" hint="Optional">
+                    <TextInput
+                      value={data.faculty_contact_phone}
+                      onChange={(e) => update("faculty_contact_phone", e.target.value)}
+                    />
+                  </Field>
                 </div>
               </div>
             )}
-          </div>
-        )}
 
-        {step === 2 && (
-          <div className="space-y-5">
-            <h2 className="font-display text-lg font-semibold text-ink">
-              Location &amp; institution
-            </h2>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="State" required>
-                <Select value={data.state} onChange={(e) => update("state", e.target.value)}>
-                  {INDIAN_STATES.map((s) => (
-                    <option key={s}>{s}</option>
-                  ))}
-                </Select>
-              </Field>
-              <Field label="City" required>
-                <TextInput
-                  value={data.city}
-                  onChange={(e) => update("city", e.target.value)}
-                />
-              </Field>
-            </div>
-            <Field label="College name" required>
-              <TextInput
-                value={data.college_name}
-                onChange={(e) => update("college_name", e.target.value)}
-                placeholder="Start typing your college name"
-              />
-            </Field>
-            <Field label="College type">
-              <Select
-                value={data.college_type}
-                onChange={(e) => update("college_type", e.target.value)}
-              >
-                <option value="">Select</option>
-                {COLLEGE_TYPES.map((t) => (
-                  <option key={t}>{t}</option>
-                ))}
-              </Select>
-            </Field>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Faculty / point of contact name" hint="Optional">
-                <TextInput
-                  value={data.faculty_contact_name}
-                  onChange={(e) => update("faculty_contact_name", e.target.value)}
-                />
-              </Field>
-              <Field label="Faculty contact phone" hint="Optional">
-                <TextInput
-                  value={data.faculty_contact_phone}
-                  onChange={(e) => update("faculty_contact_phone", e.target.value)}
-                />
-              </Field>
-            </div>
-          </div>
-        )}
+            {step === 3 && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="font-display text-lg font-semibold text-ink">
+                    Project &amp; Sector details
+                  </h2>
+                  <p className="mt-1 text-sm text-muted">
+                    Provide your project details and set up your portal login password below.
+                  </p>
+                </div>
 
-        {step === 3 && (
-          <div className="space-y-5">
-            <h2 className="font-display text-lg font-semibold text-ink">
-              Sector
-            </h2>
-            <Field
-              label="Which sector is your project in?"
-              required
-              hint="This determines your project code prefix"
-            >
-              <Select
-                value={data.sector_prefix}
-                onChange={(e) => update("sector_prefix", e.target.value)}
-              >
-                <option value="">Select a sector</option>
-                {SECTORS.map((s) => (
-                  <option key={s.prefix} value={s.prefix}>
-                    {s.label} ({s.prefix})
-                  </option>
-                ))}
-              </Select>
-            </Field>
-            <Field label="Sub-theme or focus area" hint="Optional — helps with mentor matching later">
-              <TextInput
-                value={data.sub_theme}
-                onChange={(e) => update("sub_theme", e.target.value)}
-                placeholder="e.g. Waste management, Water conservation"
-              />
-            </Field>
-          </div>
-        )}
+                {/* Sector selection */}
+                <div className="space-y-4 rounded-xl border border-line bg-paper p-5">
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-marigold">
+                    1. Sector Selection
+                  </h3>
+                  <Field
+                    label="Which sector is your project in?"
+                    required
+                    hint="This determines your project code prefix"
+                  >
+                    <Select
+                      value={data.sector_prefix}
+                      onChange={(e) => update("sector_prefix", e.target.value)}
+                    >
+                      <option value="">Select a sector</option>
+                      {SECTORS.map((s) => (
+                        <option key={s.prefix} value={s.prefix}>
+                          {s.label} ({s.prefix})
+                        </option>
+                      ))}
+                    </Select>
+                  </Field>
+                  <Field label="Sub-theme or focus area" hint="Optional — helps with mentor matching later">
+                    <TextInput
+                      value={data.sub_theme}
+                      onChange={(e) => update("sub_theme", e.target.value)}
+                      placeholder="e.g. Waste management, Water conservation"
+                    />
+                  </Field>
+                </div>
 
-        {step === 4 && (
-          <div className="space-y-5">
-            <h2 className="font-display text-lg font-semibold text-ink">
-              Project details
-            </h2>
-            <Field label="Project name" required>
-              <TextInput
-                value={data.project_name}
-                onChange={(e) => update("project_name", e.target.value)}
-              />
-            </Field>
-            <Field label="Problem statement" required hint="What problem are you solving? (~150 words)">
-              <TextArea
-                value={data.problem_statement}
-                onChange={(e) => update("problem_statement", e.target.value)}
-              />
-            </Field>
-            <Field label="Proposed solution" required hint="~300 words">
-              <TextArea
-                value={data.proposed_solution}
-                onChange={(e) => update("proposed_solution", e.target.value)}
-              />
-            </Field>
-            <Field label="Target beneficiaries" required>
-              <TextArea
-                value={data.target_beneficiaries}
-                onChange={(e) => update("target_beneficiaries", e.target.value)}
-              />
-            </Field>
-            <Field label="What makes your approach unique?" hint="Optional">
-              <TextArea
-                value={data.innovation_notes}
-                onChange={(e) => update("innovation_notes", e.target.value)}
-              />
-            </Field>
-            <Field label="Current stage of your idea">
-              <Select
-                value={data.idea_stage}
-                onChange={(e) => update("idea_stage", e.target.value)}
-              >
-                <option value="">Select</option>
-                {IDEA_STAGES.map((s) => (
-                  <option key={s}>{s}</option>
-                ))}
-              </Select>
-            </Field>
-          </div>
-        )}
+                {/* Project Details */}
+                <div className="space-y-4 rounded-xl border border-line bg-paper p-5">
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-marigold">
+                    2. Project Details
+                  </h3>
+                  <Field label="Project name" required>
+                    <TextInput
+                      value={data.project_name}
+                      onChange={(e) => update("project_name", e.target.value)}
+                    />
+                  </Field>
+                  <Field label="Problem statement" required hint="What problem are you solving? (~150 words)">
+                    <TextArea
+                      value={data.problem_statement}
+                      onChange={(e) => update("problem_statement", e.target.value)}
+                    />
+                  </Field>
+                  <Field label="Proposed solution" required hint="~300 words">
+                    <TextArea
+                      value={data.proposed_solution}
+                      onChange={(e) => update("proposed_solution", e.target.value)}
+                    />
+                  </Field>
+                  <Field label="Target beneficiaries" required>
+                    <TextArea
+                      value={data.target_beneficiaries}
+                      onChange={(e) => update("target_beneficiaries", e.target.value)}
+                    />
+                  </Field>
+                  <Field label="What makes your approach unique?" hint="Optional">
+                    <TextArea
+                      value={data.innovation_notes}
+                      onChange={(e) => update("innovation_notes", e.target.value)}
+                    />
+                  </Field>
+                  <Field label="Current stage of your idea">
+                    <Select
+                      value={data.idea_stage}
+                      onChange={(e) => update("idea_stage", e.target.value)}
+                    >
+                      <option value="">Select</option>
+                      {IDEA_STAGES.map((s) => (
+                        <option key={s}>{s}</option>
+                      ))}
+                    </Select>
+                  </Field>
+                </div>
 
-        {step === 5 && (
-          <div className="space-y-5">
-            <h2 className="font-display text-lg font-semibold text-ink">
-              Review your details
-            </h2>
-            <p className="text-sm text-muted">
-              Check everything below carefully — you can go back and edit any step before
-              continuing.
-            </p>
+                {/* Password Setup */}
+                <div className="space-y-4 rounded-xl border border-line bg-paper p-5">
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-marigold">
+                    3. Set Portal Password
+                  </h3>
+                  <p className="text-xs text-muted">
+                    This password will be used by {data.leader_email || "the team leader"} to log into the I2I portal.
+                  </p>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Field label="Password" required hint="At least 8 characters">
+                      <TextInput
+                        type="password"
+                        value={data.leader_password}
+                        onChange={(e) => update("leader_password", e.target.value)}
+                        autoComplete="new-password"
+                      />
+                    </Field>
+                    <Field label="Confirm password" required>
+                      <TextInput
+                        type="password"
+                        value={data.leader_password_confirm}
+                        onChange={(e) => update("leader_password_confirm", e.target.value)}
+                        autoComplete="new-password"
+                      />
+                    </Field>
+                  </div>
+                </div>
 
-            <div className="space-y-4 rounded-lg border border-line bg-paper p-4 text-sm">
-              <PreviewRow label="Team name" value={data.team_name} />
-              <PreviewRow label="Team size" value={String(data.team_size)} />
-              <PreviewRow label="Team leader" value={`${data.leader_name} · ${data.leader_email} · ${data.leader_phone}`} />
-              {data.members.map((m, i) => (
-                <PreviewRow
-                  key={i}
-                  label={`Member ${i + 2}`}
-                  value={`${m.full_name} · ${m.email} · ${m.phone || "—"}`}
-                />
-              ))}
-              <PreviewRow label="College" value={`${data.college_name}, ${data.city}, ${data.state}`} />
-              <PreviewRow
-                label="Sector"
-                value={SECTORS.find((s) => s.prefix === data.sector_prefix)?.label || "—"}
-              />
-              <PreviewRow label="Project name" value={data.project_name} />
-              <PreviewRow label="Problem statement" value={data.problem_statement} />
-              <PreviewRow label="Proposed solution" value={data.proposed_solution} />
-              <PreviewRow label="Target beneficiaries" value={data.target_beneficiaries} />
-            </div>
-
-            <div className="rounded-lg border border-line bg-paper p-4">
-              <label className="flex items-start gap-2.5 text-sm text-ink-light">
-                <input
-                  type="checkbox"
-                  checked={data.consent_given}
-                  onChange={(e) => update("consent_given", e.target.checked)}
-                  className="mt-0.5 h-4 w-4 rounded border-line accent-marigold"
-                />
-                <span>
-                  I confirm the information provided is accurate, and I agree to the
-                  I2I terms and data privacy policy.
-                </span>
-              </label>
-            </div>
-          </div>
-        )}
-
-        {step === 6 && (
-          <div className="space-y-5">
-            <h2 className="font-display text-lg font-semibold text-ink">
-              Set your portal password
-            </h2>
-            <p className="text-sm text-muted">
-              This is what the team leader ({data.leader_email}) will use to log in — no
-              email link needed. You'll get a confirmation email with these details too.
-            </p>
-            <Field label="Password" required hint="At least 8 characters">
-              <TextInput
-                type="password"
-                value={data.leader_password}
-                onChange={(e) => update("leader_password", e.target.value)}
-                autoComplete="new-password"
-              />
-            </Field>
-            <Field label="Confirm password" required>
-              <TextInput
-                type="password"
-                value={data.leader_password_confirm}
-                onChange={(e) => update("leader_password_confirm", e.target.value)}
-                autoComplete="new-password"
-              />
-            </Field>
-          </div>
-        )}
+                {/* Declaration Checkbox */}
+                <div className="rounded-xl border border-line bg-paper p-4">
+                  <label className="flex items-start gap-2.5 text-sm text-ink-light">
+                    <input
+                      type="checkbox"
+                      checked={data.consent_given}
+                      onChange={(e) => update("consent_given", e.target.checked)}
+                      className="mt-0.5 h-4 w-4 rounded border-line accent-marigold"
+                    />
+                    <span>
+                      I confirm the information provided is accurate, and I agree to the
+                      I2I terms and data privacy policy.
+                    </span>
+                  </label>
+                </div>
+              </div>
+            )}
           </motion.div>
         </AnimatePresence>
 
@@ -682,24 +650,148 @@ export function RegistrationWizard() {
           >
             Back
           </button>
-          {step < 6 ? (
-            <button
-              onClick={next}
-              className="rounded-lg bg-ink px-5 py-2.5 text-sm font-semibold text-paper transition hover:bg-ink-light"
-            >
-              {step === 4 ? "Preview" : "Continue"}
-            </button>
-          ) : (
-            <button
-              onClick={submit}
-              disabled={submitting}
-              className="rounded-lg bg-marigold px-5 py-2.5 text-sm font-semibold text-ink transition hover:brightness-95 disabled:opacity-60"
-            >
-              {submitting ? "Submitting..." : "Complete registration"}
-            </button>
-          )}
+
+          <div className="flex items-center gap-3">
+            {step === 3 && (
+              <button
+                type="button"
+                onClick={() => setShowReviewModal(true)}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-paper px-3.5 py-2 text-xs font-semibold text-ink transition hover:bg-surface hover:border-ink/30"
+              >
+                <Eye className="size-3.5 text-marigold" />
+                Review Details
+              </button>
+            )}
+
+            {step < 3 ? (
+              <button
+                onClick={next}
+                className="rounded-lg bg-ink px-5 py-2.5 text-sm font-semibold text-paper transition hover:bg-ink-light"
+              >
+                Continue
+              </button>
+            ) : (
+              <button
+                onClick={submit}
+                disabled={submitting}
+                className="rounded-lg bg-marigold px-5 py-2.5 text-sm font-semibold text-ink transition hover:brightness-95 disabled:opacity-60"
+              >
+                {submitting ? "Submitting..." : "Complete registration"}
+              </button>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Review Details Pop-up Modal */}
+      <AnimatePresence>
+        {showReviewModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowReviewModal(false)}
+              className="absolute inset-0 bg-black/70 backdrop-blur-xs"
+            />
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 12 }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className="relative z-10 flex max-h-[85vh] w-full max-w-2xl flex-col rounded-2xl border border-line bg-surface shadow-2xl"
+            >
+              <div className="flex items-center justify-between border-b border-line px-6 py-4">
+                <div className="flex items-center gap-2">
+                  <Eye className="size-4 text-marigold" />
+                  <h3 className="font-display text-base font-semibold text-ink">
+                    Review your registration details
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowReviewModal(false)}
+                  className="rounded-lg p-1 text-muted transition hover:bg-paper hover:text-ink"
+                >
+                  <X className="size-5" />
+                </button>
+              </div>
+
+              <div className="space-y-4 overflow-y-auto p-6 text-sm">
+                <p className="text-xs text-muted">
+                  Check your entered information below before completing your registration.
+                </p>
+
+                <div className="space-y-3 rounded-xl border border-line bg-paper p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-marigold">
+                    Team &amp; Leader
+                  </p>
+                  <PreviewRow label="Team name" value={data.team_name} />
+                  <PreviewRow label="Team size" value={String(data.team_size)} />
+                  <PreviewRow
+                    label="Team leader"
+                    value={`${data.leader_name} · ${data.leader_email} · ${data.leader_phone}`}
+                  />
+                  {data.members.map((m, i) => (
+                    <PreviewRow
+                      key={i}
+                      label={`Member ${i + 2}`}
+                      value={`${m.full_name} · ${m.email} · ${m.phone || "—"}`}
+                    />
+                  ))}
+                </div>
+
+                <div className="space-y-3 rounded-xl border border-line bg-paper p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-marigold">
+                    Location &amp; Institution
+                  </p>
+                  <PreviewRow
+                    label="College"
+                    value={`${data.college_name || "—"}, ${data.city || "—"}, ${data.state || "—"}`}
+                  />
+                  <PreviewRow label="College type" value={data.college_type} />
+                  <PreviewRow label="Faculty POC" value={data.faculty_contact_name} />
+                </div>
+
+                <div className="space-y-3 rounded-xl border border-line bg-paper p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-marigold">
+                    Project &amp; Sector
+                  </p>
+                  <PreviewRow
+                    label="Sector"
+                    value={SECTORS.find((s) => s.prefix === data.sector_prefix)?.label || "—"}
+                  />
+                  <PreviewRow label="Sub-theme" value={data.sub_theme} />
+                  <PreviewRow label="Project name" value={data.project_name} />
+                  <PreviewRow label="Problem statement" value={data.problem_statement} />
+                  <PreviewRow label="Proposed solution" value={data.proposed_solution} />
+                  <PreviewRow label="Beneficiaries" value={data.target_beneficiaries} />
+                  <PreviewRow label="Idea stage" value={data.idea_stage} />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between border-t border-line px-6 py-4">
+                <button
+                  type="button"
+                  onClick={() => setShowReviewModal(false)}
+                  className="rounded-lg border border-line px-4 py-2 text-xs font-medium text-muted transition hover:bg-paper hover:text-ink"
+                >
+                  Edit details
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowReviewModal(false)}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-ink px-4 py-2 text-xs font-semibold text-paper transition hover:bg-ink-light"
+                >
+                  <CheckCircle2 className="size-3.5 text-marigold" />
+                  Looks good!
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
