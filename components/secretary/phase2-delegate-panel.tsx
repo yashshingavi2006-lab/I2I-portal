@@ -88,7 +88,7 @@ export function Phase2DelegatePanel({
 
   return (
     <div className="mb-6 rounded-2xl border border-line bg-surface p-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="font-display text-base font-semibold text-ink">
             Give Access — Delegate Phase 2 Review
@@ -100,7 +100,7 @@ export function Phase2DelegatePanel({
         </div>
         <button
           onClick={() => setOpen((o) => !o)}
-          className="whitespace-nowrap rounded-lg border border-line px-3 py-1.5 text-xs font-semibold text-ink-light hover:border-marigold hover:text-marigold"
+          className="whitespace-nowrap self-start rounded-lg border border-line px-3 py-1.5 text-xs font-semibold text-ink-light hover:border-marigold hover:text-marigold"
         >
           {open ? "Hide" : delegations.length > 0 ? `${delegations.length} delegated` : "Delegate a project"}
         </button>

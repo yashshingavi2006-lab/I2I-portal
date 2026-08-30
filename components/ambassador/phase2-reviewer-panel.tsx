@@ -86,7 +86,7 @@ export function Phase2ReviewerPanel({ initialRows }: { initialRows: Row[] }) {
 
   return (
     <div className="rounded-2xl border border-line bg-surface p-6">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-marigold">
             Delegated Review
@@ -103,11 +103,12 @@ export function Phase2ReviewerPanel({ initialRows }: { initialRows: Row[] }) {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search projects..."
-          className="w-48 shrink-0 rounded-lg border border-line bg-paper px-3 py-2 text-xs text-ink outline-none focus:border-marigold"
+          className="w-full rounded-lg border border-line bg-paper px-3 py-2 text-xs text-ink outline-none focus:border-marigold sm:w-48 sm:shrink-0"
         />
       </div>
 
       <div className="mt-4 overflow-hidden rounded-2xl border border-line bg-paper">
+       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-line text-xs uppercase tracking-wide text-muted">
             <tr>
@@ -179,6 +180,7 @@ export function Phase2ReviewerPanel({ initialRows }: { initialRows: Row[] }) {
             ))}
           </tbody>
         </table>
+       </div>
       </div>
 
       {reviewingId && (

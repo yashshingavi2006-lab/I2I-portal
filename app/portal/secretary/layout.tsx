@@ -24,9 +24,9 @@ export default async function SecretaryLayout({
   if (!staff || staff.role !== "secretary") redirect("/dashboard");
 
   return (
-    <PageShell particles={false} theme="v0" scene3d className="flex min-h-screen">
+    <PageShell particles={false} theme="v0" scene3d className="flex min-h-screen flex-col sm:flex-row">
       <SecretarySidebar name={staff.full_name} email={staff.email} />
-      <main className="min-w-0 flex-1 px-6 py-8 sm:px-10">{children}</main>
+      <main className="min-w-0 flex-1 px-4 py-6 sm:px-10 sm:py-8">{children}</main>
     </PageShell>
   );
 }
