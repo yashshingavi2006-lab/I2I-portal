@@ -16,7 +16,7 @@ export function Reach() {
       <SectionHeader
         eyebrow="Statewide Reach"
         title="Twelve regions. One outreach circuit across Maharashtra."
-        description="July–October 2024: the I2I team crossed Maharashtra to reconnect with colleges and build new relationships with E-cells, activity clubs, faculty, and Training & Placement Offices — covering every major region of the state."
+        description="The I2I team stays connected across Maharashtra, building relationships with colleges, E-cells, activity clubs, faculty, and Training & Placement Offices — covering every major region of the state."
       />
 
       <div className="mt-12 grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
@@ -42,21 +42,20 @@ export function Reach() {
                 Major Activities &amp; Events
               </p>
               <h3 className="mt-2 font-display text-lg font-bold">Statewide Outreach &amp; Publicity</h3>
-              <p className="mt-1 font-mono text-[11px] text-muted-foreground">Duration: July – October 2024</p>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                Publicity was conducted across{' '}
+                The I2I team runs outreach and publicity across{' '}
                 <span className="border-b border-primary/50 text-foreground">Marathwada</span>,{' '}
                 <span className="border-b border-primary/50 text-foreground">Pune region</span>,{' '}
                 <span className="border-b border-primary/50 text-foreground">Satara</span>,{' '}
                 <span className="border-b border-primary/50 text-foreground">Sangli</span>, and{' '}
-                <span className="border-b border-primary/50 text-foreground">Kolhapur</span>, and in
-                reconnecting with colleges in{' '}
+                <span className="border-b border-primary/50 text-foreground">Kolhapur</span>, and
+                stays connected with colleges in{' '}
                 <span className="border-b border-primary/50 text-foreground">Nashik</span>,{' '}
-                <span className="border-b border-primary/50 text-foreground">Nagar</span>, and{' '}
-                <span className="border-b border-primary/50 text-foreground">Amravati</span> and Nagpur.
-                The team connected with 15+ E-cells and student activity clubs, building strong
-                relationships with faculty members, Training &amp; Placement Offices, and
-                institutional leaders across Maharashtra.
+                <span className="border-b border-primary/50 text-foreground">Nagar</span>,{' '}
+                <span className="border-b border-primary/50 text-foreground">Amravati</span>, and
+                Nagpur. The team maintains an active network of 15+ E-cells and student activity
+                clubs, building strong relationships with faculty members, Training &amp; Placement
+                Offices, and institutional leaders across Maharashtra.
               </p>
             </div>
           </Reveal>
