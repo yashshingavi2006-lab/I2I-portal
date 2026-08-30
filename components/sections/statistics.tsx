@@ -1,17 +1,17 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Rocket, Banknote, Users, Award } from 'lucide-react'
+import { Rocket, Building2, Users, Award } from 'lucide-react'
 import { Section, SectionHeader } from '@/components/section'
 import { Counter } from '@/components/counter'
 import { GradientOrbs } from '@/components/background-fx'
 import { StaggerGroup, StaggerItem } from '@/components/motion-primitives'
 
 const stats = [
-  { icon: Rocket, to: 120, suffix: '+', label: 'Startups incubated', hint: 'Across 6 verticals' },
-  { icon: Banknote, prefix: '₹', to: 40, suffix: 'Cr+', label: 'Capital mobilised', hint: 'Grants & seed rounds' },
-  { icon: Users, to: 9000, suffix: '+', label: 'Innovators engaged', hint: 'Students & alumni' },
-  { icon: Award, to: 65, suffix: '+', label: 'National awards', hint: 'Hackathons & pitches' },
+  { icon: Users, to: 10000, suffix: '+', label: 'Innovators engaged', hint: 'Participants over 10 years' },
+  { icon: Rocket, to: 2000, suffix: '+', label: 'Projects developed', hint: 'Across all cohorts' },
+  { icon: Building2, to: 50, suffix: '+', label: 'Colleges & institutes', hint: 'Across Maharashtra & India' },
+  { icon: Award, to: 10, suffix: '+', label: 'Years running', hint: 'Since inception' },
 ]
 
 export function Statistics() {
@@ -39,7 +39,7 @@ export function Statistics() {
                   <s.icon className="size-5" />
                 </span>
                 <p className="mt-5 font-display text-4xl font-semibold tracking-tight text-foreground">
-                  <Counter to={s.to} prefix={s.prefix} suffix={s.suffix} />
+                  <Counter to={s.to} suffix={s.suffix} />
                 </p>
                 <p className="mt-1 text-sm font-medium text-foreground">{s.label}</p>
                 <p className="mt-0.5 text-xs text-muted-foreground">{s.hint}</p>
