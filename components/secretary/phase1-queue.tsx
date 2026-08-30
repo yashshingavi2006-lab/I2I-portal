@@ -72,7 +72,7 @@ export function Phase1Queue({ initialTeams }: { initialTeams: Team[] }) {
 
   return (
     <div>
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-marigold">Phase 1</p>
           <h1 className="mt-1 font-display text-2xl font-bold text-ink">Registration Queue</h1>
@@ -89,13 +89,13 @@ export function Phase1Queue({ initialTeams }: { initialTeams: Team[] }) {
         </button>
       </div>
 
-      <div className="mt-6 flex items-center justify-between gap-4">
-        <div className="flex gap-1 rounded-lg border border-line bg-surface p-1">
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex gap-1 overflow-x-auto rounded-lg border border-line bg-surface p-1">
           {TABS.map((t) => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${
+              className={`shrink-0 rounded-md px-3 py-1.5 text-xs font-medium transition ${
                 tab === t.key ? "bg-marigold text-ink" : "text-muted hover:text-ink"
               }`}
             >
@@ -107,11 +107,12 @@ export function Phase1Queue({ initialTeams }: { initialTeams: Team[] }) {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search projects..."
-          className="w-56 rounded-lg border border-line bg-surface px-3 py-2 text-xs text-ink outline-none focus:border-marigold"
+          className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-xs text-ink outline-none focus:border-marigold sm:w-56"
         />
       </div>
 
       <div className="mt-4 overflow-hidden rounded-2xl border border-line bg-surface">
+       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-line bg-paper text-xs uppercase tracking-wide text-muted">
             <tr>
@@ -154,6 +155,7 @@ export function Phase1Queue({ initialTeams }: { initialTeams: Team[] }) {
             )}
           </tbody>
         </table>
+       </div>
       </div>
 
       {selectedTeamId && (

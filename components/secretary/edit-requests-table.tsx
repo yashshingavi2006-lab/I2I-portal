@@ -54,7 +54,7 @@ export function EditRequestsTable({ initialRows }: { initialRows: Row[] }) {
           ) : (
             pending.map((r) => (
               <div key={r.id} className="rounded-xl border border-line bg-surface p-4">
-                <div className="flex items-start justify-between">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <p className="text-sm font-semibold text-ink">
                       {r.project_code} — {r.team_name}

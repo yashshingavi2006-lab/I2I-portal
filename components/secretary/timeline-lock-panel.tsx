@@ -54,6 +54,7 @@ export function TimelineLockPanel({ teams: initialTeams }: { teams: Team[] }) {
           Phase 3 development is over, before final evaluation.
         </p>
       </div>
+      <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
         <thead className="border-b border-line bg-paper text-xs uppercase tracking-wide text-muted">
           <tr>
@@ -95,6 +96,7 @@ export function TimelineLockPanel({ teams: initialTeams }: { teams: Team[] }) {
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }

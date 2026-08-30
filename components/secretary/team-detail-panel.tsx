@@ -219,7 +219,7 @@ function DetailSection({ title, children }: { title: string; children: React.Rea
   return (
     <div className="mb-6">
       <h3 className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted">{title}</h3>
-      <div className="grid grid-cols-2 gap-x-4 gap-y-2.5">{children}</div>
+      <div className="grid grid-cols-1 gap-x-4 gap-y-2.5 sm:grid-cols-2">{children}</div>
     </div>
   );
 }

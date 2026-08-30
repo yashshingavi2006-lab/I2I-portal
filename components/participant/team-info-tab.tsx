@@ -53,14 +53,14 @@ export function TeamInfoTab({ team }: { team: TeamData }) {
 
   return (
     <div>
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 className="font-display text-xl font-bold text-ink">Team Profile Details</h2>
           <p className="mt-1 text-sm text-muted">Below are your registered competition parameters.</p>
         </div>
         <button
           onClick={() => setShowEditRequest(true)}
-          className="rounded-lg bg-marigold px-4 py-2 text-sm font-semibold text-ink"
+          className="whitespace-nowrap self-start rounded-lg bg-marigold px-4 py-2 text-sm font-semibold text-ink"
         >
           Raise Edit Request
         </button>
