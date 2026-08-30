@@ -94,13 +94,10 @@ export function Hero() {
             transition={{ duration: 0.8, delay: 0.9 }}
             className="mt-4 grid grid-cols-3 gap-6 border-t border-border pt-6"
           >
-            {/* UNVERIFIED — these numbers are v0's placeholder defaults, not
-                confirmed real Bhau Institute/i2i figures. Replace with real
-                numbers before going live. */}
             {[
-              { v: '120+', l: 'Startups incubated' },
-              { v: '₹40Cr+', l: 'Funding raised' },
-              { v: '9,000+', l: 'Innovators' },
+              { v: '10,000+', l: 'Innovators engaged' },
+              { v: '2,000+', l: 'Projects developed' },
+              { v: '10+', l: 'Years running' },
             ].map((s) => (
               <div key={s.l} className="flex flex-col gap-1">
                 <dt className="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
@@ -127,8 +124,7 @@ export function Hero() {
               <span className="relative inline-flex size-2.5 rounded-full bg-primary" />
             </span>
             <span className="text-xs text-muted-foreground">
-              <span className="font-medium text-foreground">Live ecosystem</span> · 42 active
-              ventures
+              <span className="font-medium text-foreground">Live ecosystem</span> · 10th year running
             </span>
           </div>
         </motion.div>
