@@ -152,10 +152,6 @@ export function ReachMap({ compact = false }: { compact?: boolean }) {
       >
         {map}
       </div>
-
-      <p className="mt-3 text-center font-mono text-[10.5px] text-muted-foreground opacity-70">
-        Stylized outline — proportioned from real geography, not a precise trace. Hover a pin for detail.
-      </p>
     </div>
   )
 }
