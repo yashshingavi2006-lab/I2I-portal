@@ -21,17 +21,17 @@ const startups = [
     image: '/startups/medhya.png',
   },
   {
-    name: '[Add your next project]',
-    sector: 'Environment',
+    name: 'Agri-Lift',
+    sector: 'Agriculture',
     stage: 'i2i Cohort',
-    blurb: 'Placeholder - replace with a real i2i project once you have the name and details.',
+    blurb: 'Multi-functional mechanical vehicle helping farmers carry dairy and agri materials, sow seeds, and spray fertilisers — reducing back injuries with a companion mobile app.',
     image: '/startups/verdantiq.png',
   },
   {
-    name: '[Add your next project]',
-    sector: 'Education',
+    name: 'NavSense',
+    sector: 'Innovation & Technology',
     stage: 'i2i Cohort',
-    blurb: 'Placeholder - replace with a real i2i project once you have the name and details.',
+    blurb: 'LIDAR-powered smart navigation cane for the visually impaired with obstacle & water detection, haptic alerts, AI-driven guidance, GPS, and an emergency SOS button.',
     image: '/startups/aerograft.png',
   },
 ]
