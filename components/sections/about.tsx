@@ -1,30 +1,30 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Rocket, Users, Lightbulb, Building2 } from 'lucide-react'
+import { GraduationCap, FileSearch, Banknote, Award } from 'lucide-react'
 import { Section, SectionHeader } from '@/components/section'
 import { StaggerGroup, StaggerItem, Reveal } from '@/components/motion-primitives'
 
 const pillars = [
   {
-    icon: Lightbulb,
-    title: 'Idea to Prototype',
-    body: 'Structured validation sprints, design studios, and rapid prototyping labs to pressure-test every hypothesis.',
+    icon: GraduationCap,
+    title: 'Phase 1 — Registration',
+    body: 'Registration opens each year across multiple sectors and closes in the last week of September. Open to Indian resident students nationwide, eligible to compete for i2i funding.',
   },
   {
-    icon: Rocket,
-    title: 'Venture Acceleration',
-    body: 'Go-to-market playbooks, pilot customers, and growth capital to move ventures from launch to traction.',
+    icon: FileSearch,
+    title: 'Phase 2 — Screening',
+    body: 'Participating teams submit a project proposal and presentation outlining their idea, budget, and impact — the basis on which funded projects are selected.',
   },
   {
-    icon: Users,
-    title: 'Founder Community',
-    body: 'A peer network of student founders, alumni operators, and domain experts building in the open, together.',
+    icon: Banknote,
+    title: 'Phase 3 — Mentoring',
+    body: "Selected projects receive funds released per i2i's guidelines, giving teams a defined window to build and complete a working model of their idea.",
   },
   {
-    icon: Building2,
-    title: 'Deep Industry Access',
-    body: 'Direct lines to corporates, investors, and research labs through the Bhau Institute partner network.',
+    icon: Award,
+    title: 'Phase 4 — Recognition',
+    body: 'Shortlisted projects pitch to a panel of industrialists, with the best teams honored at the Valedictory Ceremony at COEP Technological University.',
   },
 ]
 
