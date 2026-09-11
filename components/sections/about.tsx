@@ -41,7 +41,7 @@ export function About() {
                 <span className="text-gradient-amber">enduring enterprise</span>
               </>
             }
-            description="Ignited Innovators of India is the flagship initiative of the Bhau Institute of Entrepreneurship & Leadership at COEP Technological University. We equip students with the mindset, mentorship, and machinery to build ventures that matter."
+            description="Ignited Innovators of India was founded by Prof. Sanjay Inamdar with the blessing of Dr. APJ Abdul Kalam, and operates under COEP Technological University's Bhau Institute of Entrepreneurship & Leadership, with the continued support of Eaton India Foundation. The initiative develops student entrepreneurs and leaders who create lasting techno-social impact."
           />
           <Reveal delay={0.15}>
             <div className="mt-8 flex flex-wrap gap-2.5">
