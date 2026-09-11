@@ -1,5 +1,70 @@
 import { createClient } from "@/lib/supabase/server";
 
+// Every teams.status value the DB allows (database/01_schema.sql) — kept in
+// one place so the phase breakdown below can never silently drop a status.
+const STATUS_GROUPS = [
+  { label: "Phase 1 – Registration", statuses: ["registered", "under_review"], color: "bg-marigold" },
+  { label: "Phase 2 – Proposal & Funding", statuses: ["shortlisted_phase2"], color: "bg-marigold" },
+  { label: "Phase 3 – Development", statuses: ["shortlisted_phase3"], color: "bg-marigold" },
+  { label: "Phase 4 – Final Evaluation", statuses: ["funded", "completed"], color: "bg-marigold" },
+  { label: "Rejected", statuses: ["rejected"], color: "bg-red-500/70" },
+  { label: "Withdrawn", statuses: ["withdrawn"], color: "bg-muted-foreground/40" },
+] as const;
+
+type AuditEntry = {
+  actor_name: string;
+  action: string;
+  details: Record<string, unknown> | null;
+  created_at: string;
+};
+
+// Turns a raw {action, details} audit row into a readable one-liner instead
+// of just the humanized action name — details is jsonb and was being fetched
+// then thrown away entirely.
+function describeAuditEntry(a: AuditEntry): string {
+  const d = a.details ?? {};
+  switch (a.action) {
+    case "bulk_eligible":
+      return `Made ${d.teams_updated ?? "?"} team(s) eligible for Phase 2`;
+    case "screening_pass":
+      return "Phase 2 screening: passed";
+    case "screening_reject":
+      return "Phase 2 screening: rejected";
+    case "phase2_review_delegated":
+      return "Delegated a Phase 2 project for review";
+    case "timeline_locked":
+      return "Locked a team's Phase 3 timeline";
+    case "timeline_unlocked":
+      return "Unlocked a team's Phase 3 timeline";
+    case "assignment_created":
+      return "Assigned mentor/ambassador to a team";
+    case "funding_decision":
+      return `Funding decision: ${d.status ?? "updated"}${d.amount ? ` — ₹${d.amount}` : ""}`;
+    case "phase_settings_updated":
+      return `Updated Phase ${d.phase_number ?? "?"} settings`;
+    case "registration_accepted":
+      return "Accepted a team's registration";
+    case "registration_rejected":
+      return "Rejected a team's registration";
+    case "phase2_spreadsheet_import":
+      return `Imported Phase 2 spreadsheet — ${d.accepted ?? 0} accepted`;
+    case "staff_invited":
+      return `Invited ${d.email ?? "a staff member"} as ${d.role ?? "staff"}`;
+    case "staff_reactivated":
+      return "Reactivated a staff account";
+    case "staff_deactivated":
+      return "Deactivated a staff account";
+    case "staff_updated":
+      return "Updated a staff account";
+    default:
+      if (a.action.startsWith("bulk_import_")) {
+        const role = a.action.replace("bulk_import_", "");
+        return `Bulk-imported ${d.created ?? 0} ${role} account(s)`;
+      }
+      return a.action.replace(/_/g, " ");
+  }
+}
+
 export default async function SecretaryOverview() {
   const supabase = await createClient();
 
@@ -28,14 +93,9 @@ export default async function SecretaryOverview() {
   });
   const maxSectorCount = Math.max(1, ...Array.from(bySectorId.values()));
 
-  const statusGroups = [
-    { label: "Registration & Submission", statuses: ["registered", "under_review"] },
-    { label: "Technical Proposal & Feasibility", statuses: ["shortlisted_phase2"] },
-    { label: "Mentorship & Business Model", statuses: ["shortlisted_phase3"] },
-    { label: "Prototype & MVP Development", statuses: ["funded", "completed"] },
-  ].map((g) => ({
+  const statusGroups = STATUS_GROUPS.map((g) => ({
     ...g,
-    count: (teams ?? []).filter((t) => g.statuses.includes(t.status)).length,
+    count: (teams ?? []).filter((t) => (g.statuses as readonly string[]).includes(t.status)).length,
   }));
 
   return (
@@ -45,24 +105,24 @@ export default async function SecretaryOverview() {
       </p>
       <h1 className="mt-1 font-display text-2xl font-bold text-ink">Performance Dashboard</h1>
       <p className="mt-1 text-sm text-muted">
-        Competition key metrics and student innovation distributions.
+        Competition key metrics and project distribution across phases.
       </p>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-4">
-        <StatCard label="Total Innovations" value={total ?? 0} />
+        <StatCard label="Total Projects" value={total ?? 0} />
         <StatCard label="Pending Reviews" value={pending ?? 0} accent />
-        <StatCard label="Eligible Innovations" value={eligible ?? 0} green />
+        <StatCard label="Eligible Projects" value={eligible ?? 0} green />
         <StatCard label="Selection Rate" value={`${selectionRate}%`} />
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
         <div className="rounded-2xl border border-line bg-surface p-6">
-          <h3 className="font-display text-sm font-semibold text-ink">Innovations by Sector</h3>
+          <h3 className="font-display text-sm font-semibold text-ink">Projects by Sector</h3>
           <div className="mt-5 flex h-40 items-end gap-3">
             {(sectors ?? []).map((s) => {
               const count = bySectorId.get(s.id) ?? 0;
               return (
-                <div key={s.prefix} className="flex flex-1 flex-col items-center gap-1.5">
+                <div key={s.prefix} className="flex flex-1 flex-col items-center gap-1.5" title={s.display_name}>
                   <div className="flex h-32 w-full items-end">
                     <div
                       className="w-full rounded-t bg-marigold/70"
@@ -78,7 +138,7 @@ export default async function SecretaryOverview() {
 
         <div className="rounded-2xl border border-line bg-surface p-6">
           <h3 className="font-display text-sm font-semibold text-ink">
-            Innovations by Competition Gate
+            Projects by Phase
           </h3>
           <div className="mt-5 space-y-3">
             {statusGroups.map((g) => (
@@ -89,7 +149,7 @@ export default async function SecretaryOverview() {
                 </div>
                 <div className="mt-1 h-1.5 rounded-full bg-paper">
                   <div
-                    className="h-1.5 rounded-full bg-marigold"
+                    className={`h-1.5 rounded-full ${g.color}`}
                     style={{
                       width: `${total ? Math.min(100, (g.count / total) * 100) : 0}%`,
                     }}
@@ -110,13 +170,13 @@ export default async function SecretaryOverview() {
             audit!.map((a, i) => (
               <div key={i} className="flex items-center justify-between border-b border-line pb-2.5 last:border-0">
                 <div>
-                  <p className="text-sm font-medium capitalize text-ink">
-                    {a.action.replace(/_/g, " ")}
-                  </p>
+                  <p className="text-sm font-medium text-ink">{describeAuditEntry(a)}</p>
                   <p className="text-xs text-muted">{a.actor_name}</p>
                 </div>
-                <span className="text-xs text-muted">
+                <span className="whitespace-nowrap text-xs text-muted">
                   {new Date(a.created_at).toLocaleString("en-IN", {
+                    day: "numeric",
+                    month: "short",
                     hour: "2-digit",
                     minute: "2-digit",
                   })}
