@@ -1,9 +1,18 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { GraduationCap, FileSearch, Banknote, Award } from 'lucide-react'
+import { GraduationCap, FileSearch, Banknote, Award, HandHeart, Sprout, Lightbulb, Leaf, Rocket } from 'lucide-react'
 import { Section, SectionHeader } from '@/components/section'
 import { StaggerGroup, StaggerItem, Reveal } from '@/components/motion-primitives'
+
+const sectors = [
+  { icon: HandHeart, label: '3H (Health, Hunger, Humanity)' },
+  { icon: Sprout, label: 'Agriculture' },
+  { icon: GraduationCap, label: 'Education' },
+  { icon: Lightbulb, label: 'Innovation & Technology' },
+  { icon: Leaf, label: 'Environment' },
+  { icon: Rocket, label: 'Entrepreneurship' },
+]
 
 const pillars = [
   {
@@ -44,14 +53,17 @@ export function About() {
             description="Ignited Innovators of India was founded by Prof. Sanjay Inamdar with the blessing of Dr. APJ Abdul Kalam, and operates under COEP Technological University's Bhau Institute of Entrepreneurship & Leadership, with the continued support of Eaton India Foundation. The initiative develops student entrepreneurs and leaders who create lasting techno-social impact."
           />
           <Reveal delay={0.15}>
-            <div className="mt-8 flex flex-wrap gap-2.5">
-              {['Health', 'Agriculture', 'Education', 'Innovation', 'Environment', 'Entrepreneurship'].map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-full border border-border bg-secondary/40 px-3 py-1.5 text-xs text-muted-foreground"
+            <div className="mt-8 grid grid-cols-2 gap-3">
+              {sectors.map((s) => (
+                <div
+                  key={s.label}
+                  className="flex items-center gap-3 rounded-xl border border-border bg-secondary/40 px-3.5 py-3"
                 >
-                  {tag}
-                </span>
+                  <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary/12 text-primary ring-1 ring-inset ring-primary/20">
+                    <s.icon className="size-4" />
+                  </span>
+                  <span className="text-sm font-semibold leading-tight text-foreground">{s.label}</span>
+                </div>
               ))}
             </div>
           </Reveal>
