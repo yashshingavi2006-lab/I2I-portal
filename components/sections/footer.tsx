@@ -30,12 +30,12 @@ const columns = [
   {
     title: 'Institute',
     links: [
-      // TODO: About Bhau / COEP Tech / Contact need real URLs — waiting on
+      // TODO: About Bhau / COEP Tech still need real URLs — waiting on
       // the i2i.org.in reference to fill these in rather than guessing.
       { label: 'About Bhau', href: '#about' },
       { label: 'COEP Tech', href: '#about' },
       { label: 'Guidelines & Policies', href: '/guidelines' },
-      { label: 'Contact', href: '#about' },
+      { label: 'Contact', href: '/contact' },
     ],
   },
 ]
