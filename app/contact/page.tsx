@@ -12,11 +12,17 @@ export const metadata: Metadata = {
 }
 
 // Institutional contact details only — sourced from i2i.org.in/contact-us
-// and bhau.org/contact. Deliberately omitting individual committee member
-// names/numbers found alongside these: different searches turned up
-// different people (student coordinators rotate every cohort), so there's
-// no way to confirm which, if any, are still current.
-const DETAILS = [
+// and bhau.org/contact, plus current committee phone numbers confirmed
+// directly by the site owner.
+type ContactDetail = {
+  icon: typeof MapPin
+  label: string
+  value?: string
+  href?: string
+  contacts?: { name: string; number: string }[]
+}
+
+const DETAILS: ContactDetail[] = [
   {
     icon: MapPin,
     label: 'Address',
@@ -25,8 +31,10 @@ const DETAILS = [
   {
     icon: Phone,
     label: 'Phone',
-    value: '020 2550 7023',
-    href: 'tel:+912025507023',
+    contacts: [
+      { name: 'Aditya Kasod', number: '9766820696' },
+      { name: 'Vikas Kamble', number: '7350742541' },
+    ],
   },
   {
     icon: Mail,
@@ -61,7 +69,19 @@ export default function ContactPage() {
                       <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                         {d.label}
                       </p>
-                      {d.href ? (
+                      {d.contacts ? (
+                        <div className="mt-1 space-y-0.5">
+                          {d.contacts.map((c) => (
+                            <a
+                              key={c.number}
+                              href={`tel:+91${c.number}`}
+                              className="block text-sm font-medium text-foreground hover:text-primary"
+                            >
+                              {c.name} — {c.number}
+                            </a>
+                          ))}
+                        </div>
+                      ) : d.href ? (
                         <a href={d.href} className="mt-1 block text-sm font-medium text-foreground hover:text-primary">
                           {d.value}
                         </a>
