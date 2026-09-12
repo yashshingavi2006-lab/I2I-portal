@@ -129,11 +129,11 @@ function HeroScene() {
           <img
             src="/logos/i2i.png"
             alt="I2I — Ignited Innovators of India"
-            width={140}
-            height={99}
+            width={230}
+            height={162}
             style={{
               display: "block",
-              width: 140,
+              width: 230,
               height: "auto",
               maxWidth: "none",
               filter: "drop-shadow(0 0 26px rgba(242,169,60,0.45))",
