@@ -46,6 +46,8 @@ function describeAuditEntry(a: AuditEntry): string {
       return "Accepted a team's registration";
     case "registration_rejected":
       return "Rejected a team's registration";
+    case "phase1_spreadsheet_import":
+      return `Imported Phase 1 registrations — ${d.created ?? 0} created, ${d.skipped ?? 0} skipped, ${d.errors ?? 0} errors`;
     case "phase2_spreadsheet_import":
       return `Imported Phase 2 spreadsheet — ${d.accepted ?? 0} accepted`;
     case "staff_invited":

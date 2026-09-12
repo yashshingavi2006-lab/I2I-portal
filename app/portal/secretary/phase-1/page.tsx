@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { Phase1Queue } from "@/components/secretary/phase1-queue";
+import { Phase1ImportPanel } from "@/components/secretary/phase1-import-panel";
 
 export default async function Phase1Page() {
   const supabase = await createClient();
@@ -29,5 +30,10 @@ export default async function Phase1Page() {
     return true;
   });
 
-  return <Phase1Queue initialTeams={teams} />;
+  return (
+    <>
+      <Phase1ImportPanel />
+      <Phase1Queue initialTeams={teams} />
+    </>
+  );
 }
