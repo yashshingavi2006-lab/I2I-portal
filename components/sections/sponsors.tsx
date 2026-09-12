@@ -8,13 +8,13 @@ const tiers = [
   {
     tier: 'Organized By',
     items: [
-      { name: 'Bhau Institute of Innovation, Entrepreneurship & Leadership', logo: '/logos/bhau-institute.png', w: 200, h: 183 },
-      { name: 'COEP Technological University', logo: '/logos/coep-tech.png', w: 145, h: 180 },
+      { name: 'Bhau Institute of Innovation, Entrepreneurship & Leadership', logo: '/logos/bhau-institute.png', w: 1983, h: 1738 },
+      { name: 'COEP Technological University', logo: '/logos/coep-tech.png', w: 333, h: 396 },
     ],
   },
   {
     tier: 'Proudly Sponsored By',
-    items: [{ name: 'Eaton', logo: '/logos/eaton.png', w: 196, h: 64 }],
+    items: [{ name: 'Eaton', logo: '/logos/eaton.png', w: 290, h: 181 }],
   },
 ]
 
