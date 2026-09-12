@@ -8,13 +8,13 @@ const tiers = [
   {
     tier: 'Organized By',
     items: [
-      { name: 'Bhau Institute of Innovation, Entrepreneurship & Leadership', logo: '/logos/bhau-institute.png' },
-      { name: 'COEP Technological University', logo: '/logos/coep-tech.png' },
+      { name: 'Bhau Institute of Innovation, Entrepreneurship & Leadership', logo: '/logos/bhau-institute.png', w: 200, h: 183 },
+      { name: 'COEP Technological University', logo: '/logos/coep-tech.png', w: 145, h: 180 },
     ],
   },
   {
     tier: 'Proudly Sponsored By',
-    items: [{ name: 'Eaton', logo: '/logos/eaton.png' }],
+    items: [{ name: 'Eaton', logo: '/logos/eaton.png', w: 196, h: 64 }],
   },
 ]
 
@@ -27,20 +27,26 @@ export function Sponsors() {
         align="center"
       />
 
-      <div className="mt-14 flex flex-col gap-10">
+      <div className="mt-16 flex flex-col gap-16">
         {tiers.map((t) => (
-          <div key={t.tier} className="flex flex-col gap-5">
+          <div key={t.tier} className="flex flex-col gap-8">
             <p className="text-center font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
               {t.tier}
             </p>
-            <StaggerGroup className="flex flex-wrap justify-center gap-4">
+            <StaggerGroup className="flex flex-wrap items-center justify-center gap-12 sm:gap-16">
               {t.items.map((item) => (
                 <StaggerItem key={item.name}>
                   <div
                     title={item.name}
-                    className="flex items-center justify-center rounded-2xl bg-white p-4 shadow-sm transition-transform duration-300 hover:-translate-y-1"
+                    className="flex h-32 w-40 items-center justify-center transition-transform duration-300 hover:-translate-y-1 sm:h-44 sm:w-56 md:h-52 md:w-64"
                   >
-                    <Image src={item.logo} alt={item.name} width={200} height={200} className="size-16 object-contain" />
+                    <Image
+                      src={item.logo}
+                      alt={item.name}
+                      width={item.w}
+                      height={item.h}
+                      className="h-full w-full object-contain"
+                    />
                   </div>
                 </StaggerItem>
               ))}
