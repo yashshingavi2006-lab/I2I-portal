@@ -2,7 +2,7 @@
 
 import { useMemo, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Sparkles } from "@react-three/drei";
+import { Sparkles, Html } from "@react-three/drei";
 import * as THREE from "three";
 
 const AMBER = "#F2A93C";
@@ -121,6 +121,25 @@ function HeroScene() {
       <ambientLight intensity={0.3} />
       <group position={[2.3, 0.3, -0.5]}>
         <ParticleCrystal scale={2.1} />
+        {/* The i2i mark, anchored to the same 3D point as the crystal so it
+            tracks the real projected screen position (drei computes this
+            from the live camera/canvas every frame) instead of guessing at
+            a fixed CSS position that only lined up at one viewport size. */}
+        <Html center zIndexRange={[5, 0]} style={{ pointerEvents: "none" }}>
+          <img
+            src="/logos/i2i.png"
+            alt="I2I — Ignited Innovators of India"
+            width={140}
+            height={99}
+            style={{
+              display: "block",
+              width: 140,
+              height: "auto",
+              maxWidth: "none",
+              filter: "drop-shadow(0 0 26px rgba(242,169,60,0.45))",
+            }}
+          />
+        </Html>
       </group>
       <Sparkles count={70} scale={13} size={1.6} speed={0.2} color={AMBER_SOFT} opacity={0.35} />
     </>

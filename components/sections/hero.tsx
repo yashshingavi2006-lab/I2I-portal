@@ -1,7 +1,6 @@
 'use client'
 
 import { useRef } from 'react'
-import Image from 'next/image'
 import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion'
 import { ArrowUpRight, Sparkles } from 'lucide-react'
 import { AnimatedText } from '@/components/motion-primitives'
@@ -118,19 +117,10 @@ export function Hero() {
         >
           {/* The 3D particle crystal (Scene3DBackground, mounted at section
               level) renders into this half of the frame — this column is a
-              deliberate empty stage for it, not a card. The i2i mark sits
-              centered in front of it, so the animation reads as "the
-              network this logo represents" instead of an unrelated shape. */}
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <Image
-              src="/logos/i2i.png"
-              alt="I2I — Ignited Innovators of India"
-              width={538}
-              height={379}
-              className="w-1/2 max-w-[220px] opacity-90 drop-shadow-[0_0_40px_rgba(242,169,60,0.4)]"
-            />
-          </div>
-
+              deliberate empty stage for it, not a card. The i2i mark is
+              rendered inside the 3D scene itself (scene-3d-inner.tsx) via
+              drei's <Html>, anchored to the crystal's own group so it tracks
+              the real projected screen position at any viewport size. */}
           <div className="glass-strong absolute bottom-0 left-6 flex items-center gap-3 rounded-2xl px-4 py-3">
             <span className="relative flex size-2.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-70" />
