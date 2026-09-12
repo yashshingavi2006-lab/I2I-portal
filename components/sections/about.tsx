@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { GraduationCap, FileSearch, Banknote, Award, HandHeart, Sprout, Lightbulb, Leaf, Rocket } from 'lucide-react'
 import { Section, SectionHeader } from '@/components/section'
 import { StaggerGroup, StaggerItem, Reveal } from '@/components/motion-primitives'
+import { WatchStoryButton } from '@/components/watch-story-modal'
 
 const sectors = [
   { icon: HandHeart, label: '3H (Health, Hunger, Humanity)' },
@@ -52,6 +53,11 @@ export function About() {
             }
             description="Ignited Innovators of India was founded by Prof. Sanjay Inamdar with the blessing of Dr. APJ Abdul Kalam, and operates under COEP Technological University's Bhau Institute of Entrepreneurship & Leadership, with the continued support of Eaton India Foundation. The initiative develops student entrepreneurs and leaders who create lasting techno-social impact."
           />
+          <Reveal delay={0.1}>
+            <div className="mt-6">
+              <WatchStoryButton />
+            </div>
+          </Reveal>
           <Reveal delay={0.15}>
             <div className="mt-8 grid grid-cols-2 gap-3">
               {sectors.map((s) => (
