@@ -1,6 +1,7 @@
 'use client'
 
-import { Flame, ArrowUpRight } from 'lucide-react'
+import Image from 'next/image'
+import { ArrowUpRight } from 'lucide-react'
 import { MagneticButton } from '@/components/magnetic-button'
 import { GradientOrbs } from '@/components/background-fx'
 import { Reveal } from '@/components/motion-primitives'
@@ -77,13 +78,14 @@ export function Footer() {
         {/* links */}
         <div className="grid grid-cols-2 gap-10 py-16 sm:grid-cols-2 lg:grid-cols-5">
           <div className="col-span-2 flex flex-col gap-4">
-            <a href="#top" className="flex items-center gap-2.5" aria-label="I2I home">
-              <span className="grid size-9 place-items-center rounded-full bg-primary text-primary-foreground">
-                <Flame className="size-5" strokeWidth={2.2} />
-              </span>
-              <span className="font-display text-base font-semibold tracking-tight">
-                Ignited Innovators of India
-              </span>
+            <a href="#top" className="flex items-center" aria-label="I2I home">
+              <Image
+                src="/logos/i2i.png"
+                alt="I2I — Ignited Innovators of India"
+                width={538}
+                height={379}
+                className="h-11 w-auto"
+              />
             </a>
             <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
               The flagship innovation and entrepreneurship initiative of Bhau Institute, COEP

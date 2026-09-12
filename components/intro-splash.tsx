@@ -1,8 +1,8 @@
 'use client'
 
 import { useLayoutEffect, useState } from 'react'
+import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Flame } from 'lucide-react'
 import { Particles } from '@/components/background-fx'
 
 const SESSION_KEY = 'i2i-intro-seen'
@@ -59,40 +59,20 @@ export function IntroSplash() {
           />
 
           <div className="relative flex flex-col items-center gap-6">
-            <motion.span
-              initial={{ scale: 0, rotate: -30, opacity: 0 }}
-              animate={{ scale: 1, rotate: 0, opacity: 1 }}
-              transition={{ duration: 0.7, ease: [0.34, 1.56, 0.64, 1], delay: 0.1 }}
-              className="grid size-20 place-items-center rounded-full bg-primary text-primary-foreground shadow-[0_0_50px_-4px_var(--amber)]"
-            >
-              <Flame className="size-10" strokeWidth={2} />
-            </motion.span>
-
             <motion.div
-              initial={{ scale: 0, opacity: 0.8 }}
-              animate={{ scale: [1, 2.4], opacity: [0.5, 0] }}
-              transition={{ duration: 1.6, delay: 0.5, ease: 'easeOut' }}
-              className="pointer-events-none absolute top-0 size-20 rounded-full border border-primary"
-            />
-
-            <div className="flex flex-col items-center gap-1 overflow-hidden">
-              <motion.span
-                initial={{ y: '100%', opacity: 0 }}
-                animate={{ y: '0%', opacity: 1 }}
-                transition={{ duration: 0.7, ease: easeOut, delay: 0.55 }}
-                className="font-display text-4xl font-bold tracking-tight sm:text-6xl"
-              >
-                I2I
-              </motion.span>
-              <motion.span
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, ease: easeOut, delay: 0.95 }}
-                className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground sm:text-sm"
-              >
-                Ignited Innovators of India
-              </motion.span>
-            </div>
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.7, ease: [0.34, 1.56, 0.64, 1], delay: 0.1 }}
+            >
+              <Image
+                src="/logos/i2i.png"
+                alt="I2I — Ignited Innovators of India"
+                width={538}
+                height={379}
+                priority
+                className="h-24 w-auto sm:h-32"
+              />
+            </motion.div>
           </div>
 
           <motion.button
