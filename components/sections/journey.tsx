@@ -92,6 +92,26 @@ export function Journey() {
           })}
         </div>
       </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-100px' }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        className="glass mt-14 overflow-hidden rounded-2xl p-2"
+      >
+        <p className="px-4 pt-3 text-center font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
+          The full process, in 30 seconds
+        </p>
+        <video
+          src="/videos/i2i-process.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="mt-3 w-full rounded-xl"
+        />
+      </motion.div>
     </Section>
   )
 }
