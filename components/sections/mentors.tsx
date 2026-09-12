@@ -9,11 +9,20 @@ import { StaggerGroup, StaggerItem, Reveal } from '@/components/motion-primitive
 // Leadership sourced verbatim from i2i.org.in's "Our Backbone" and "Our
 // Executive Team" sections.
 const leadership = [
-  { name: 'Prof. Sanjay Inamdar', role: 'Co-Founder – BIEL & Chief Mentor – i2i', org: 'BIEL / i2i', initials: 'SI' },
-  { name: 'Prof. Sunil Bhirud', role: 'Vice Chancellor', org: 'COEP Tech', initials: 'SB' },
-  { name: 'Dr. Vidya N. More', role: 'Faculty Advisor', org: 'i2i', initials: 'VM' },
-  { name: 'Mr. Swapnil Mali', role: 'AGM', org: 'BIEL', initials: 'SM' },
-  { name: 'Mr. Vikas Kamble', role: 'Project Research Assistant', org: 'i2i', initials: 'VK' },
+  { name: 'Prof. Sanjay Inamdar', role: 'Co-Founder – BIEL & Chief Mentor – i2i', org: 'BIEL / i2i', initials: 'SI', photo: '/mentors/sanjay-inamdar.jpg' },
+  { name: 'Prof. Sunil Bhirud', role: 'Vice Chancellor', org: 'COEP Tech', initials: 'SB', photo: '/mentors/sunil-bhirud.jpg' },
+  { name: 'Dr. Vidya N. More', role: 'Faculty Advisor', org: 'i2i', initials: 'VM', photo: '/mentors/vidya-more.webp' },
+  { name: 'Mr. Swapnil Mali', role: 'AGM', org: 'BIEL', initials: 'SM', photo: '/mentors/swapnil-mali.jpg' },
+  { name: 'Mr. Vikas Kamble', role: 'Project Research Assistant', org: 'i2i', initials: 'VK', photo: '/mentors/vikas-kamble.webp' },
+]
+
+// Past student Secretaries who have run i2i's day-to-day operations each
+// year, sourced from i2i.org.in's team page.
+const pastSecretaries = [
+  { name: 'Mr. Aditya Kasod', role: 'Secretary (2025-26)', org: 'i2i', initials: 'AK', photo: '/mentors/aditya-kasod.webp' },
+  { name: 'Mr. Atharva Shingane', role: 'Secretary (2024-25)', org: 'i2i', initials: 'AS', photo: '/mentors/atharva-shingane.webp' },
+  { name: 'Mr. Saket Kaswa', role: 'Secretary (2023-24)', org: 'i2i', initials: 'SK', photo: '/mentors/saket-kaswa.jpg' },
+  { name: 'Mr. Soham Methul', role: 'Secretary (2022-23)', org: 'i2i', initials: 'SM', photo: '/mentors/soham-methul.webp' },
 ]
 
 // Real Eaton mentors who guide the i2i program, sourced from i2i's official
@@ -38,7 +47,7 @@ const partners: ({ type: 'logo' } | { type: 'text'; label: string })[] = Array(5
   .fill([{ type: 'logo' as const }, { type: 'text' as const, label: 'Eaton India Foundation' }])
   .flat()
 
-function PersonCard({ m }: { m: { name: string; role: string; org: string; initials: string } }) {
+function PersonCard({ m }: { m: { name: string; role: string; org: string; initials: string; photo?: string } }) {
   return (
     <motion.div
       whileHover={{ y: -6 }}
@@ -46,9 +55,15 @@ function PersonCard({ m }: { m: { name: string; role: string; org: string; initi
       className="group glass relative flex h-full flex-col items-center gap-3 rounded-2xl p-5 text-center transition-colors duration-300 hover:border-[color:color-mix(in_oklch,var(--amber)_45%,transparent)]"
     >
       <div className="relative">
-        <div className="grid size-16 place-items-center rounded-full bg-secondary font-display text-lg font-semibold text-foreground ring-1 ring-inset ring-border">
-          {m.initials}
-        </div>
+        {m.photo ? (
+          <div className="relative size-16 overflow-hidden rounded-full ring-1 ring-inset ring-border">
+            <Image src={m.photo} alt={m.name} fill sizes="64px" className="object-cover" />
+          </div>
+        ) : (
+          <div className="grid size-16 place-items-center rounded-full bg-secondary font-display text-lg font-semibold text-foreground ring-1 ring-inset ring-border">
+            {m.initials}
+          </div>
+        )}
         <span className="absolute inset-0 rounded-full ring-2 ring-primary/0 transition-all duration-300 group-hover:ring-primary/50" />
       </div>
       <div className="flex flex-col gap-0.5">
@@ -81,6 +96,19 @@ export function Mentors() {
         </p>
         <StaggerGroup className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
           {leadership.map((m) => (
+            <StaggerItem key={m.name}>
+              <PersonCard m={m} />
+            </StaggerItem>
+          ))}
+        </StaggerGroup>
+      </div>
+
+      <div className="mt-12">
+        <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
+          Past Secretaries
+        </p>
+        <StaggerGroup className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          {pastSecretaries.map((m) => (
             <StaggerItem key={m.name}>
               <PersonCard m={m} />
             </StaggerItem>
