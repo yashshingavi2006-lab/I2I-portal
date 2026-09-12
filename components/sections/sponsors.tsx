@@ -1,16 +1,20 @@
 'use client'
 
+import Image from 'next/image'
 import { Section, SectionHeader } from '@/components/section'
 import { StaggerGroup, StaggerItem } from '@/components/motion-primitives'
 
 const tiers = [
   {
     tier: 'Organized By',
-    items: ['Bhau Institute of Innovation, Entrepreneurship & Leadership', 'COEP Technological University'],
+    items: [
+      { name: 'Bhau Institute of Innovation, Entrepreneurship & Leadership', logo: '/logos/bhau-institute.png' },
+      { name: 'COEP Technological University', logo: '/logos/coep-tech.png' },
+    ],
   },
   {
     tier: 'Proudly Sponsored By',
-    items: ['Eaton', 'Eaton India Foundation'],
+    items: [{ name: 'Eaton', logo: '/logos/eaton.png' }],
   },
 ]
 
@@ -29,11 +33,14 @@ export function Sponsors() {
             <p className="text-center font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
               {t.tier}
             </p>
-            <StaggerGroup className="flex flex-wrap justify-center gap-3">
+            <StaggerGroup className="flex flex-wrap justify-center gap-4">
               {t.items.map((item) => (
-                <StaggerItem key={item}>
-                  <div className="glass flex items-center justify-center rounded-xl px-8 py-5 font-display text-base font-semibold text-foreground/80 transition-colors duration-300 hover:text-foreground">
-                    {item}
+                <StaggerItem key={item.name}>
+                  <div
+                    title={item.name}
+                    className="flex items-center justify-center rounded-2xl bg-white p-4 shadow-sm transition-transform duration-300 hover:-translate-y-1"
+                  >
+                    <Image src={item.logo} alt={item.name} width={200} height={200} className="size-16 object-contain" />
                   </div>
                 </StaggerItem>
               ))}

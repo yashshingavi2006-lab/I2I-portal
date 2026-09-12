@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Menu, X, Flame } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const links = [
@@ -53,16 +54,15 @@ export function Navbar() {
           scrolled && 'glass-strong',
         )}
       >
-        <a href="#top" className="flex items-center gap-2.5" aria-label="I2I home">
-          <span className="grid size-9 place-items-center rounded-full bg-primary text-primary-foreground shadow-[0_0_16px_-2px_var(--amber)]">
-            <Flame className="size-5" strokeWidth={2.2} />
-          </span>
-          <span className="flex flex-col leading-none">
-            <span className="font-display text-sm font-semibold tracking-tight">I2I</span>
-            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-              Bhau Institute
-            </span>
-          </span>
+        <a href="#top" className="flex items-center" aria-label="I2I home">
+          <Image
+            src="/logos/i2i.png"
+            alt="I2I — Ignited Innovators of India"
+            width={538}
+            height={379}
+            priority
+            className="h-9 w-auto"
+          />
         </a>
 
         <div className="hidden items-center gap-1 md:flex">
