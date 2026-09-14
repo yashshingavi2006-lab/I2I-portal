@@ -1,10 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendViaSmtp } from "@/lib/notifications/providers/email-smtp";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 const RECIPIENT = "i2i.coeptech.2026@gmail.com";
 
 export async function POST(req: NextRequest) {
   try {
+    // Unauthenticated and sends to one fixed inbox — without a limit this
+    // is scriptable into a flood against that single address.
+    const ip = getClientIp(req);
+    if (!(await checkRateLimit(`raise-query:ip:${ip}`, 5, 600))) {
+      return NextResponse.json(
+        { error: "Too many queries sent from this network. Please try again in a few minutes." },
+        { status: 429 }
+      );
+    }
+
     const body = await req.json();
     const message = String(body.message ?? "").trim();
     const name = String(body.name ?? "").trim();
