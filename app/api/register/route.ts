@@ -1,9 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { dispatchNotification } from "@/lib/notifications";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
   try {
+    // Unauthenticated + creates a real Auth user + sends an email, so it's
+    // exactly the kind of endpoint that gets scripted for mass account
+    // creation or as a spam relay. Two limits: per-IP catches a scripted
+    // burst from one source, per-email catches someone targeting one
+    // victim inbox across rotating IPs.
+    const ip = getClientIp(req);
+    if (!(await checkRateLimit(`register:ip:${ip}`, 8, 600))) {
+      return NextResponse.json(
+        { error: "Too many registration attempts from this network. Please try again in a few minutes." },
+        { status: 429 }
+      );
+    }
+    const bodyForRateLimit = await req.clone().json().catch(() => null);
+    const email = String(bodyForRateLimit?.leader_email ?? "").trim().toLowerCase();
+    if (email && !(await checkRateLimit(`register:email:${email}`, 3, 3600))) {
+      return NextResponse.json(
+        { error: "Too many registration attempts for this email. Please try again later, or log in if you already registered." },
+        { status: 429 }
+      );
+    }
+
     return await handleRegistration(req);
   } catch (e) {
     // Catches anything unexpected (missing/invalid env vars, Supabase being
