@@ -9,6 +9,7 @@ import { StaggerGroup, StaggerItem, Reveal } from '@/components/motion-primitive
 // Leadership sourced verbatim from i2i.org.in's "Our Backbone" and "Our
 // Executive Team" sections.
 const leadership = [
+  { name: 'Mr. Mandar Joshi', role: "CEO – COEP's Bhau Institute of Innovation, Entrepreneurship & Leadership", org: 'BIEL', initials: 'MJ', photo: '/mentors/mandar-joshi.jpg' },
   { name: 'Prof. Sanjay Inamdar', role: 'Co-Founder – BIEL & Founder – i2i', org: 'BIEL / i2i', initials: 'SI', photo: '/mentors/sanjay-inamdar.jpg' },
   { name: 'Prof. Sunil Bhirud', role: 'Vice Chancellor', org: 'COEP Tech', initials: 'SB', photo: '/mentors/sunil-bhirud.jpg' },
   { name: 'Dr. AM More', role: 'Faculty Advisor', org: 'i2i', initials: 'AM', photo: '/mentors/am-more.jpg' },
@@ -106,7 +107,7 @@ export function Mentors() {
         <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
           Leadership
         </p>
-        <StaggerGroup className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+        <StaggerGroup className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3">
           {leadership.map((m) => (
             <StaggerItem key={m.name}>
               <PersonCard m={m} />
