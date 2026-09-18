@@ -2,29 +2,52 @@
 
 import { useRef, useState } from "react";
 
-type RowResult = { email: string; status: "created" | "skipped" | "error"; detail: string };
+type RowResult = { email: string; status: "created" | "skipped" | "error"; detail: string; fileName?: string };
 
 export function Phase1ImportPanel() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState<{ current: number; total: number } | null>(null);
   const [results, setResults] = useState<RowResult[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  async function upload(file: File) {
+  async function uploadOne(file: File): Promise<RowResult[]> {
+    const body = new FormData();
+    body.append("file", file);
+    const res = await fetch("/api/secretary/phase1-import", { method: "POST", body });
+    const json = await res.json().catch(() => null);
+    if (!res.ok) throw new Error(json?.error || `Import failed (${res.status})`);
+    return (json.results as RowResult[]).map((r) => ({ ...r, fileName: file.name }));
+  }
+
+  async function upload(files: File[]) {
     setUploading(true);
     setError(null);
     setResults(null);
+    const allResults: RowResult[] = [];
     try {
-      const body = new FormData();
-      body.append("file", file);
-      const res = await fetch("/api/secretary/phase1-import", { method: "POST", body });
-      const json = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(json?.error || `Import failed (${res.status})`);
-      setResults(json.results);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Import failed. Try again.");
+      // Uploaded one at a time (not in parallel) — each spreadsheet can have
+      // hundreds of rows, each row doing a real Supabase Auth + DB write, so
+      // running several files at once risks tripping the server's request
+      // concurrency/timeout limits for no real benefit here.
+      for (let i = 0; i < files.length; i++) {
+        setProgress({ current: i + 1, total: files.length });
+        try {
+          const fileResults = await uploadOne(files[i]);
+          allResults.push(...fileResults);
+        } catch (err) {
+          allResults.push({
+            email: `(entire file)`,
+            status: "error",
+            detail: err instanceof Error ? err.message : "Import failed for this file.",
+            fileName: files[i].name,
+          });
+        }
+      }
+      setResults(allResults);
     } finally {
       setUploading(false);
+      setProgress(null);
       if (inputRef.current) inputRef.current.value = "";
     }
   }
@@ -32,6 +55,7 @@ export function Phase1ImportPanel() {
   const created = results?.filter((r) => r.status === "created").length ?? 0;
   const skipped = results?.filter((r) => r.status === "skipped").length ?? 0;
   const errored = results?.filter((r) => r.status === "error").length ?? 0;
+  const multipleFilesUsed = new Set(results?.map((r) => r.fileName)).size > 1;
 
   return (
     <div className="mb-6 rounded-2xl border border-line bg-surface p-6">
@@ -40,7 +64,9 @@ export function Phase1ImportPanel() {
       </h2>
       <p className="mt-1 text-xs text-muted">
         Export the Google Form responses as .xlsx and upload here to create each team&apos;s
-        registration and portal login in one step, instead of entering them by hand.
+        registration and portal login in one step, instead of entering them by hand. You can
+        select multiple spreadsheet files at once — e.g. if responses came in separate exports —
+        and they&apos;ll all be imported together.
       </p>
       <p className="mt-2 text-xs text-muted">
         Required columns: Team Name, Leader Name, Leader Email, Leader Phone, State, City,
@@ -55,11 +81,12 @@ export function Phase1ImportPanel() {
         ref={inputRef}
         type="file"
         accept=".xlsx"
+        multiple
         className="hidden"
         id="phase1-import"
         onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) upload(file);
+          const files = Array.from(e.target.files ?? []);
+          if (files.length > 0) upload(files);
         }}
       />
       <label
@@ -69,7 +96,11 @@ export function Phase1ImportPanel() {
         }`}
         onClick={(e) => uploading && e.preventDefault()}
       >
-        {uploading ? "Importing..." : "⬆ Upload Registrations Spreadsheet"}
+        {uploading
+          ? progress
+            ? `Importing file ${progress.current} of ${progress.total}...`
+            : "Importing..."
+          : "⬆ Upload Registrations Spreadsheet(s)"}
       </label>
 
       {error && <p className="mt-2 text-xs font-medium text-red-500">{error}</p>}
@@ -91,6 +122,9 @@ export function Phase1ImportPanel() {
                       : "text-red-400"
                 }
               >
+                {multipleFilesUsed && r.fileName && (
+                  <span className="text-muted">[{r.fileName}] </span>
+                )}
                 {r.email}: {r.detail}
               </p>
             ))}
