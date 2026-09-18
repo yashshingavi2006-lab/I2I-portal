@@ -9,11 +9,11 @@ import { StaggerGroup, StaggerItem, Reveal } from '@/components/motion-primitive
 // Leadership sourced verbatim from i2i.org.in's "Our Backbone" and "Our
 // Executive Team" sections.
 const leadership = [
-  { name: 'Prof. Sanjay Inamdar', role: 'Co-Founder – BIEL & Chief Mentor – i2i', org: 'BIEL / i2i', initials: 'SI', photo: '/mentors/sanjay-inamdar.jpg' },
+  { name: 'Prof. Sanjay Inamdar', role: 'Co-Founder – BIEL & Founder – i2i', org: 'BIEL / i2i', initials: 'SI', photo: '/mentors/sanjay-inamdar.jpg' },
   { name: 'Prof. Sunil Bhirud', role: 'Vice Chancellor', org: 'COEP Tech', initials: 'SB', photo: '/mentors/sunil-bhirud.jpg' },
-  { name: 'Dr. Vidya N. More', role: 'Faculty Advisor', org: 'i2i', initials: 'VM', photo: '/mentors/vidya-more.webp' },
+  { name: 'Dr. AM More', role: 'Faculty Advisor', org: 'i2i', initials: 'AM', photo: '/mentors/am-more.jpg' },
   { name: 'Mr. Swapnil Mali', role: 'AGM', org: 'BIEL', initials: 'SM', photo: '/mentors/swapnil-mali.jpg' },
-  { name: 'Mr. Vikas Kamble', role: 'Project Research Assistant', org: 'i2i', initials: 'VK', photo: '/mentors/vikas-kamble.webp' },
+  { name: 'Ms. Mayuri Kamble', role: 'Project Research Assistant', org: 'i2i', initials: 'MK', photo: '/mentors/mayuri-kamble.jpg' },
 ]
 
 // Past student Secretaries who have run i2i's day-to-day operations each
@@ -25,16 +25,16 @@ const pastSecretaries = [
   { name: 'Mr. Soham Methul', role: 'Secretary (2022-23)', org: 'i2i', initials: 'SM', photo: '/mentors/soham-methul.webp' },
 ]
 
-// Real Eaton mentors who guide the i2i program, sourced from i2i's official
-// site (i2i.org.in) and public LinkedIn posts from past i2i cohorts.
-// Individual role titles beyond "Eaton Mentor" weren't publicly confirmable
-// for each person except Vikas Khule — update these once you have exact
-// designations from the Eaton coordination team.
-const mentors = [
-  { name: 'Abhijeet Waghmare', role: 'Eaton Mentor', org: 'Eaton', initials: 'AW' },
-  { name: 'Bobby Zachariah', role: 'Eaton Mentor', org: 'Eaton', initials: 'BZ' },
-  { name: 'Anuja Pendse', role: 'Eaton Mentor', org: 'Eaton', initials: 'AP' },
-  { name: 'Bhavya Modi', role: 'Eaton Mentor', org: 'Eaton', initials: 'BM' },
+// Real Eaton coordinators who guide the i2i program, sourced from i2i's
+// official site (i2i.org.in) and public LinkedIn posts from past i2i
+// cohorts. Individual role titles beyond "Eaton Coordinator" weren't
+// publicly confirmable for each person except Vikas Khule — update these
+// once you have exact designations from the Eaton coordination team.
+const eatonCoordinators = [
+  { name: 'Abhijeet Waghmare', role: 'Eaton Coordinator', org: 'Eaton', initials: 'AW' },
+  { name: 'Bobby Zachariah', role: 'Eaton Coordinator', org: 'Eaton', initials: 'BZ' },
+  { name: 'Anuja Pendse', role: 'Eaton Coordinator', org: 'Eaton', initials: 'AP' },
+  { name: 'Bhavya Modi', role: 'Eaton Coordinator', org: 'Eaton', initials: 'BM' },
   { name: 'Vikas Khule', role: 'Engineering Manager', org: 'Eaton India', initials: 'VK' },
 ]
 
@@ -47,36 +47,48 @@ const partners: ({ type: 'logo' } | { type: 'text'; label: string })[] = Array(5
   .fill([{ type: 'logo' as const }, { type: 'text' as const, label: 'Eaton India Foundation' }])
   .flat()
 
-function PersonCard({ m }: { m: { name: string; role: string; org: string; initials: string; photo?: string } }) {
+function PersonCard({
+  m,
+  compact,
+}: {
+  m: { name: string; role: string; org: string; initials: string; photo?: string }
+  compact?: boolean
+}) {
   return (
     <motion.div
       whileHover={{ y: -6 }}
       transition={{ type: 'spring', stiffness: 300, damping: 22 }}
-      className="group glass relative flex h-full flex-col items-center gap-3 rounded-2xl p-5 text-center transition-colors duration-300 hover:border-[color:color-mix(in_oklch,var(--amber)_45%,transparent)]"
+      className="group glass relative flex h-full flex-col overflow-hidden rounded-2xl text-center transition-colors duration-300 hover:border-[color:color-mix(in_oklch,var(--amber)_45%,transparent)]"
     >
-      <div className="relative">
+      <div className={`relative w-full ${compact ? 'aspect-[5/3]' : 'aspect-square'}`}>
         {m.photo ? (
-          <div className="relative size-16 overflow-hidden rounded-full ring-1 ring-inset ring-border">
-            <Image src={m.photo} alt={m.name} fill sizes="64px" className="object-cover" />
-          </div>
+          <Image
+            src={m.photo}
+            alt={m.name}
+            fill
+            sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw"
+            className="object-cover"
+          />
         ) : (
-          <div className="grid size-16 place-items-center rounded-full bg-secondary font-display text-lg font-semibold text-foreground ring-1 ring-inset ring-border">
+          <div
+            className={`grid h-full w-full place-items-center bg-secondary font-display font-semibold text-foreground ${compact ? 'text-lg' : 'text-2xl'}`}
+          >
             {m.initials}
           </div>
         )}
-        <span className="absolute inset-0 rounded-full ring-2 ring-primary/0 transition-all duration-300 group-hover:ring-primary/50" />
+        <span className="pointer-events-none absolute inset-0 ring-2 ring-inset ring-primary/0 transition-all duration-300 group-hover:ring-primary/50" />
       </div>
-      <div className="flex flex-col gap-0.5">
-        <p className="text-sm font-semibold leading-tight">{m.name}</p>
+      <div className={`flex flex-1 flex-col items-center gap-0.5 ${compact ? 'p-3' : 'p-4'}`}>
+        <p className={`font-semibold leading-tight ${compact ? 'text-xs' : 'text-sm'}`}>{m.name}</p>
         <p className="text-xs text-primary">{m.role}</p>
         <p className="text-[11px] text-muted-foreground">{m.org}</p>
+        <span
+          className="mt-1 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
+          aria-hidden="true"
+        >
+          <LinkedInIcon className="size-4" />
+        </span>
       </div>
-      <span
-        className="mt-1 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
-        aria-hidden="true"
-      >
-        <LinkedInIcon className="size-4" />
-      </span>
     </motion.div>
   )
 }
@@ -118,12 +130,12 @@ export function Mentors() {
 
       <div className="mt-12">
         <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
-          Eaton Mentors
+          Eaton Coordinators
         </p>
-        <StaggerGroup className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-          {mentors.map((m) => (
+        <StaggerGroup className="mt-5 grid max-w-4xl grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-5">
+          {eatonCoordinators.map((m) => (
             <StaggerItem key={m.name}>
-              <PersonCard m={m} />
+              <PersonCard m={m} compact />
             </StaggerItem>
           ))}
         </StaggerGroup>
