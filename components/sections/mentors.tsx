@@ -25,16 +25,16 @@ const pastSecretaries = [
   { name: 'Mr. Soham Methul', role: 'Secretary (2022-23)', org: 'i2i', initials: 'SM', photo: '/mentors/soham-methul.webp' },
 ]
 
-// Real Eaton mentors who guide the i2i program, sourced from i2i's official
-// site (i2i.org.in) and public LinkedIn posts from past i2i cohorts.
-// Individual role titles beyond "Eaton Mentor" weren't publicly confirmable
-// for each person except Vikas Khule — update these once you have exact
-// designations from the Eaton coordination team.
-const mentors = [
-  { name: 'Abhijeet Waghmare', role: 'Eaton Mentor', org: 'Eaton', initials: 'AW' },
-  { name: 'Bobby Zachariah', role: 'Eaton Mentor', org: 'Eaton', initials: 'BZ' },
-  { name: 'Anuja Pendse', role: 'Eaton Mentor', org: 'Eaton', initials: 'AP' },
-  { name: 'Bhavya Modi', role: 'Eaton Mentor', org: 'Eaton', initials: 'BM' },
+// Real Eaton coordinators who guide the i2i program, sourced from i2i's
+// official site (i2i.org.in) and public LinkedIn posts from past i2i
+// cohorts. Individual role titles beyond "Eaton Coordinator" weren't
+// publicly confirmable for each person except Vikas Khule — update these
+// once you have exact designations from the Eaton coordination team.
+const eatonCoordinators = [
+  { name: 'Abhijeet Waghmare', role: 'Eaton Coordinator', org: 'Eaton', initials: 'AW' },
+  { name: 'Bobby Zachariah', role: 'Eaton Coordinator', org: 'Eaton', initials: 'BZ' },
+  { name: 'Anuja Pendse', role: 'Eaton Coordinator', org: 'Eaton', initials: 'AP' },
+  { name: 'Bhavya Modi', role: 'Eaton Coordinator', org: 'Eaton', initials: 'BM' },
   { name: 'Vikas Khule', role: 'Engineering Manager', org: 'Eaton India', initials: 'VK' },
 ]
 
@@ -47,14 +47,20 @@ const partners: ({ type: 'logo' } | { type: 'text'; label: string })[] = Array(5
   .fill([{ type: 'logo' as const }, { type: 'text' as const, label: 'Eaton India Foundation' }])
   .flat()
 
-function PersonCard({ m }: { m: { name: string; role: string; org: string; initials: string; photo?: string } }) {
+function PersonCard({
+  m,
+  compact,
+}: {
+  m: { name: string; role: string; org: string; initials: string; photo?: string }
+  compact?: boolean
+}) {
   return (
     <motion.div
       whileHover={{ y: -6 }}
       transition={{ type: 'spring', stiffness: 300, damping: 22 }}
       className="group glass relative flex h-full flex-col overflow-hidden rounded-2xl text-center transition-colors duration-300 hover:border-[color:color-mix(in_oklch,var(--amber)_45%,transparent)]"
     >
-      <div className="relative aspect-square w-full">
+      <div className={`relative w-full ${compact ? 'aspect-[5/3]' : 'aspect-square'}`}>
         {m.photo ? (
           <Image
             src={m.photo}
@@ -64,14 +70,16 @@ function PersonCard({ m }: { m: { name: string; role: string; org: string; initi
             className="object-cover"
           />
         ) : (
-          <div className="grid h-full w-full place-items-center bg-secondary font-display text-2xl font-semibold text-foreground">
+          <div
+            className={`grid h-full w-full place-items-center bg-secondary font-display font-semibold text-foreground ${compact ? 'text-lg' : 'text-2xl'}`}
+          >
             {m.initials}
           </div>
         )}
         <span className="pointer-events-none absolute inset-0 ring-2 ring-inset ring-primary/0 transition-all duration-300 group-hover:ring-primary/50" />
       </div>
-      <div className="flex flex-1 flex-col items-center gap-0.5 p-4">
-        <p className="text-sm font-semibold leading-tight">{m.name}</p>
+      <div className={`flex flex-1 flex-col items-center gap-0.5 ${compact ? 'p-3' : 'p-4'}`}>
+        <p className={`font-semibold leading-tight ${compact ? 'text-xs' : 'text-sm'}`}>{m.name}</p>
         <p className="text-xs text-primary">{m.role}</p>
         <p className="text-[11px] text-muted-foreground">{m.org}</p>
         <span
@@ -122,12 +130,12 @@ export function Mentors() {
 
       <div className="mt-12">
         <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
-          Eaton Mentors
+          Eaton Coordinators
         </p>
-        <StaggerGroup className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-          {mentors.map((m) => (
+        <StaggerGroup className="mt-5 grid max-w-4xl grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-5">
+          {eatonCoordinators.map((m) => (
             <StaggerItem key={m.name}>
-              <PersonCard m={m} />
+              <PersonCard m={m} compact />
             </StaggerItem>
           ))}
         </StaggerGroup>
