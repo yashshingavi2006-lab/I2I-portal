@@ -3,6 +3,13 @@ import ExcelJS from "exceljs";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
+// A batch of a few hundred rows (real Phase 1 volume) each doing a Supabase
+// Auth create + a couple of table writes can run past the platform's
+// default serverless timeout. Raise the ceiling for this route specifically
+// (only takes effect on plans that allow it — Vercel still caps this per
+// plan regardless of what's requested here).
+export const maxDuration = 120;
+
 const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
 
 function findColumn(headerRow: ExcelJS.Row, ...names: string[]): number | null {
