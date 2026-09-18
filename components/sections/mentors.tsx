@@ -9,11 +9,11 @@ import { StaggerGroup, StaggerItem, Reveal } from '@/components/motion-primitive
 // Leadership sourced verbatim from i2i.org.in's "Our Backbone" and "Our
 // Executive Team" sections.
 const leadership = [
-  { name: 'Prof. Sanjay Inamdar', role: 'Co-Founder – BIEL & Chief Mentor – i2i', org: 'BIEL / i2i', initials: 'SI', photo: '/mentors/sanjay-inamdar.jpg' },
+  { name: 'Prof. Sanjay Inamdar', role: 'Co-Founder – BIEL & Founder – i2i', org: 'BIEL / i2i', initials: 'SI', photo: '/mentors/sanjay-inamdar.jpg' },
   { name: 'Prof. Sunil Bhirud', role: 'Vice Chancellor', org: 'COEP Tech', initials: 'SB', photo: '/mentors/sunil-bhirud.jpg' },
-  { name: 'Dr. Vidya N. More', role: 'Faculty Advisor', org: 'i2i', initials: 'VM', photo: '/mentors/vidya-more.webp' },
+  { name: 'Dr. AM More', role: 'Faculty Advisor', org: 'i2i', initials: 'AM', photo: '/mentors/am-more.jpg' },
   { name: 'Mr. Swapnil Mali', role: 'AGM', org: 'BIEL', initials: 'SM', photo: '/mentors/swapnil-mali.jpg' },
-  { name: 'Mr. Vikas Kamble', role: 'Project Research Assistant', org: 'i2i', initials: 'VK', photo: '/mentors/vikas-kamble.webp' },
+  { name: 'Ms. Mayuri Kamble', role: 'Project Research Assistant', org: 'i2i', initials: 'MK', photo: '/mentors/mayuri-kamble.jpg' },
 ]
 
 // Past student Secretaries who have run i2i's day-to-day operations each
@@ -52,31 +52,35 @@ function PersonCard({ m }: { m: { name: string; role: string; org: string; initi
     <motion.div
       whileHover={{ y: -6 }}
       transition={{ type: 'spring', stiffness: 300, damping: 22 }}
-      className="group glass relative flex h-full flex-col items-center gap-3 rounded-2xl p-5 text-center transition-colors duration-300 hover:border-[color:color-mix(in_oklch,var(--amber)_45%,transparent)]"
+      className="group glass relative flex h-full flex-col overflow-hidden rounded-2xl text-center transition-colors duration-300 hover:border-[color:color-mix(in_oklch,var(--amber)_45%,transparent)]"
     >
-      <div className="relative">
+      <div className="relative aspect-square w-full">
         {m.photo ? (
-          <div className="relative size-16 overflow-hidden rounded-full ring-1 ring-inset ring-border">
-            <Image src={m.photo} alt={m.name} fill sizes="64px" className="object-cover" />
-          </div>
+          <Image
+            src={m.photo}
+            alt={m.name}
+            fill
+            sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw"
+            className="object-cover"
+          />
         ) : (
-          <div className="grid size-16 place-items-center rounded-full bg-secondary font-display text-lg font-semibold text-foreground ring-1 ring-inset ring-border">
+          <div className="grid h-full w-full place-items-center bg-secondary font-display text-2xl font-semibold text-foreground">
             {m.initials}
           </div>
         )}
-        <span className="absolute inset-0 rounded-full ring-2 ring-primary/0 transition-all duration-300 group-hover:ring-primary/50" />
+        <span className="pointer-events-none absolute inset-0 ring-2 ring-inset ring-primary/0 transition-all duration-300 group-hover:ring-primary/50" />
       </div>
-      <div className="flex flex-col gap-0.5">
+      <div className="flex flex-1 flex-col items-center gap-0.5 p-4">
         <p className="text-sm font-semibold leading-tight">{m.name}</p>
         <p className="text-xs text-primary">{m.role}</p>
         <p className="text-[11px] text-muted-foreground">{m.org}</p>
+        <span
+          className="mt-1 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
+          aria-hidden="true"
+        >
+          <LinkedInIcon className="size-4" />
+        </span>
       </div>
-      <span
-        className="mt-1 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
-        aria-hidden="true"
-      >
-        <LinkedInIcon className="size-4" />
-      </span>
     </motion.div>
   )
 }
